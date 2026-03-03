@@ -36,7 +36,7 @@ import NeuralTrainingMonitor from '../components/NeuralTrainingMonitor';
 import GlobalMacroView from '../components/GlobalMacroView';
 import ManualTradePanel from '../components/ManualTradePanel';
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Asset } from '../types/trading';
+import { Asset, Strategy } from '../types/trading';
 import { toast } from "sonner";
 import { Download, User, Layout, BarChart3, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,7 @@ import { Button } from '@/components/ui/button';
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
   const [activeAsset, setActiveAsset] = useState<Asset>('BTC/USD');
+  const [activeStrategy, setActiveStrategy] = useState<Strategy>('LIQUIDITY_FIB');
   const [lotSize, setLotSize] = useState(1.0);
   const [riskLevel, setRiskLevel] = useState(50);
   const [viewMode, setViewMode] = useState<'standard' | 'tradingview'>('standard');
@@ -51,7 +52,7 @@ const Index = () => {
   const { 
     candles, trades, orders, currentPrice, account, sentiment, equityHistory,
     news, geoEvents, ecoEvents, quantChat, neuralWeights, executeManualTrade, closeTrade 
-  } = useTradingSim(isActive, activeAsset);
+  } = useTradingSim(isActive, activeAsset, activeStrategy);
 
   const handleExportCSV = () => {
     const headers = ['ID', 'Asset', 'Time', 'Type', 'Price', 'Status', 'PnL', 'Reason'];
@@ -100,6 +101,8 @@ const Index = () => {
               currentPrice={currentPrice}
               activeAsset={activeAsset}
               setActiveAsset={setActiveAsset}
+              activeStrategy={activeStrategy}
+              setActiveStrategy={setActiveStrategy}
             />
           </div>
         </div>

@@ -262,17 +262,33 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, activeStrat
     const ma7 = candle.ma7 || candle.close;
     const isBullishTrend = candle.close > ma7;
 
-    if (activeStrategy === 'FIB_RETRACEMENT') {
-      // Fibonacci Retracement Logic
-      // Identify recent swing high/low from last 20 candles
+    if (activeStrategy === 'LIQUIDITY_FIB') {
+      // Liquidity Fib (SMC) Logic
+      const recentCandles = candles.slice(-30);
+      if (recentCandles.length < 30) return;
+
+      const swingHigh = Math.max(...recentCandles.slice(0, -5).map(c => c.high));
+      const swingLow = Math.min(...recentCandles.slice(0, -5).map(c => c.low));
+
+      // Detect Liquidity Sweep (Price went above high/below low and reversed)
+      const hasSweptHigh = recentCandles.some(c => c.high > swingHigh) && candle.close < swingHigh;
+      const hasSweptLow = recentCandles.some(c => c.low < swingLow) && candle.close > swingLow;
+
+      const range = swingHigh - swingLow;
+      const fib618Buy = swingLow + (range * 0.382); // Retracement to 0.618 from top
+      const fib618Sell = swingHigh - (range * 0.382); // Retracement to 0.618 from bottom
+
+      if (hasSweptLow && candle.close <= fib618Buy * 1.002 && candle.close >= fib618Buy * 0.998) {
+        executeManualTrade('BUY', candle.close, 'SMC: Liquidity Sweep + 0.618 Fib Entry');
+      } else if (hasSweptHigh && candle.close >= fib618Sell * 0.998 && candle.close <= fib618Sell * 1.002) {
+        executeManualTrade('SELL', candle.close, 'SMC: Liquidity Sweep + 0.618 Fib Entry');
+      }
+    } else if (activeStrategy === 'FIB_RETRACEMENT') {
       const recentCandles = candles.slice(-20);
       if (recentCandles.length < 20) return;
-
       const high = Math.max(...recentCandles.map(c => c.high));
       const low = Math.min(...recentCandles.map(c => c.low));
       const range = high - low;
-
-      // Golden Pocket (0.618)
       const fib618Buy = high - (range * 0.618);
       const fib618Sell = low + (range * 0.618);
 
@@ -288,7 +304,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, activeStrat
         executeManualTrade('SELL', candle.close, 'Trend: Momentum Breakdown');
       }
     } else {
-      // Default: MEAN_REVERSION
       if (rsi < 35 && isBullishTrend && candle.delta > 0) {
         executeManualTrade('BUY', candle.close, 'Alpha-Pro: Bullish Reversal');
       } else if (rsi > 65 && !isBullishTrend && candle.delta < 0) {

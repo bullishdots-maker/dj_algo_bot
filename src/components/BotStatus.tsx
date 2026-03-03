@@ -19,10 +19,19 @@ interface BotStatusProps {
   currentPrice: number;
   activeAsset: Asset;
   setActiveAsset: (asset: Asset) => void;
+  activeStrategy: Strategy;
+  setActiveStrategy: (strategy: Strategy) => void;
 }
 
-const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset }: BotStatusProps) => {
-  const [strategy, setStrategy] = React.useState<Strategy>('MEAN_REVERSION');
+const BotStatus = ({ 
+  isActive, 
+  setIsActive, 
+  currentPrice, 
+  activeAsset, 
+  setActiveAsset,
+  activeStrategy,
+  setActiveStrategy
+}: BotStatusProps) => {
 
   const formatPrice = (price: number) => {
     if (activeAsset === 'XAG/USD') return price.toFixed(3);
@@ -61,14 +70,15 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
               </div>
               <div className="space-y-1">
                 <Label className="text-[10px] uppercase text-slate-500 font-bold tracking-tighter">Strategy</Label>
-                <Select value={strategy} onValueChange={(val) => setStrategy(val as Strategy)}>
-                  <SelectTrigger className="w-[160px] bg-slate-900 border-slate-800 text-white h-9 font-bold">
+                <Select value={activeStrategy} onValueChange={(val) => setActiveStrategy(val as Strategy)}>
+                  <SelectTrigger className="w-[180px] bg-slate-900 border-slate-800 text-white h-9 font-bold">
                     <SelectValue placeholder="Strategy" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-800 text-white">
                     <SelectItem value="MEAN_REVERSION">Mean Reversion</SelectItem>
                     <SelectItem value="TREND_FOLLOWING">Trend Following</SelectItem>
                     <SelectItem value="FIB_RETRACEMENT">Fib Retracement</SelectItem>
+                    <SelectItem value="LIQUIDITY_FIB">Liquidity Fib (SMC)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

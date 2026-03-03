@@ -1,5 +1,5 @@
 export type Asset = 'XAG/USD' | 'XAU/USD' | 'BTC/USD' | 'ETH/USD';
-export type Strategy = 'MEAN_REVERSION' | 'TREND_FOLLOWING' | 'FIB_RETRACEMENT';
+export type Strategy = 'MEAN_REVERSION' | 'TREND_FOLLOWING' | 'FIB_RETRACEMENT' | 'LIQUIDITY_FIB';
 
 export interface Candle {
   time: string;
