@@ -3,7 +3,8 @@ import { Trade } from '../types/trading';
 import { Card } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
-import { TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Info, CheckCircle2, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TradeLogProps {
   trades: Trade[];
@@ -39,18 +40,41 @@ const TradeLog = ({ trades }: TradeLogProps) => {
                     {trade.type} @ {trade.price.toFixed(5)}
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-500 font-mono">{trade.time}</span>
+                <div className="flex items-center gap-2">
+                  {trade.status === 'OPEN' ? (
+                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] flex gap-1 items-center">
+                      <Clock size={10} /> OPEN
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-slate-800 text-slate-400 border-slate-700 text-[10px] flex gap-1 items-center">
+                      <CheckCircle2 size={10} /> CLOSED
+                    </Badge>
+                  )}
+                  <span className="text-[10px] text-slate-500 font-mono">{trade.time}</span>
+                </div>
               </div>
+              
               <p className="text-xs text-slate-400 leading-relaxed">
                 {trade.reason}
               </p>
-              <div className="flex gap-2">
-                <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px]">
-                  SL: {(trade.price - (trade.type === 'BUY' ? 0.0010 : -0.0010)).toFixed(5)}
-                </Badge>
-                <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
-                  TP: {(trade.price + (trade.type === 'BUY' ? 0.0020 : -0.0020)).toFixed(5)}
-                </Badge>
+
+              <div className="flex justify-between items-center pt-1">
+                <div className="flex gap-2">
+                  <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px]">
+                    SL: {(trade.price - (trade.type === 'BUY' ? 0.0010 : -0.0010)).toFixed(5)}
+                  </Badge>
+                  <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
+                    TP: {(trade.price + (trade.type === 'BUY' ? 0.0020 : -0.0020)).toFixed(5)}
+                  </Badge>
+                </div>
+                {trade.status === 'CLOSED' && (
+                  <span className={cn(
+                    "text-xs font-mono font-bold",
+                    (trade.pnl || 0) >= 0 ? "text-emerald-400" : "text-rose-400"
+                  )}>
+                    {(trade.pnl || 0) >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
+                  </span>
+                )}
               </div>
             </div>
           ))}

@@ -5,7 +5,7 @@ export interface Candle {
   low: number;
   close: number;
   volume: number;
-  delta: number; // Order flow delta (Buy - Sell)
+  delta: number;
 }
 
 export interface Trade {
@@ -15,7 +15,8 @@ export interface Trade {
   price: number;
   reason: string;
   status: 'OPEN' | 'CLOSED';
-  profit?: number;
+  pnl?: number; // Profit or Loss
+  exitPrice?: number;
 }
 
 export interface MarketOrder {
@@ -25,4 +26,11 @@ export interface MarketOrder {
   size: number;
   side: 'BUY' | 'SELL';
   imbalance: boolean;
+}
+
+export interface AccountStats {
+  balance: number;
+  equity: number;
+  totalProfit: number;
+  winRate: number;
 }

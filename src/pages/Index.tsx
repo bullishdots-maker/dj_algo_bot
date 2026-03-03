@@ -4,15 +4,19 @@ import PriceChart from '../components/PriceChart';
 import OrderFlowTape from '../components/OrderFlowTape';
 import BotStatus from '../components/BotStatus';
 import TradeLog from '../components/TradeLog';
+import AccountOverview from '../components/AccountOverview';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
-  const { candles, trades, orders, currentPrice } = useTradingSim(isActive);
+  const { candles, trades, orders, currentPrice, account } = useTradingSim(isActive);
 
   return (
     <div className="min-h-screen bg-black text-slate-200 p-4 md:p-8 font-sans selection:bg-blue-500/30">
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Account Stats Row */}
+        <AccountOverview account={account} />
+
         {/* Header & Controls */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
