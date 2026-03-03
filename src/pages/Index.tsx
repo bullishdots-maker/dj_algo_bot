@@ -136,6 +136,9 @@ const Index = () => {
             <User size={12} />
             <span>© 2024 AlgoBot Pro. Developed by <span className="text-slate-300 font-bold">DJ trades</span>.</span>
           </div>
+          <div className="text-[10px] font-bold text-slate-700 uppercase tracking-[0.3em] animate-pulse">
+            Dikshil Jagani - The Man Behind This Bot
+          </div>
           <MadeWithDyad />
         </footer>
       </div>

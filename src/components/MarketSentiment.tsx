@@ -15,7 +15,7 @@ const MarketSentiment = ({ sentiment }: MarketSentimentProps) => {
     <Card className="p-6 bg-slate-950 border-slate-800">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Zap className="text-amber-400" size={20} />
+          < Zap className="text-amber-400" size={20} />
           <h3 className="text-slate-200 font-semibold">Market Sentiment</h3>
         </div>
         <div className={cn(
