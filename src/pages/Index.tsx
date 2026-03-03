@@ -14,6 +14,7 @@ import NewsTicker from '../components/NewsTicker';
 import TechnicalAnalysis from '../components/TechnicalAnalysis';
 import RiskRewardPanel from '../components/RiskRewardPanel';
 import MT5Connector from '../components/MT5Connector';
+import GeoPoliticalPanel from '../components/GeoPoliticalPanel';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
@@ -110,16 +111,19 @@ const Index = () => {
               <EconomicCalendar />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <RiskRewardPanel lotSize={lotSize} currentPrice={currentPrice} />
+              <GeoPoliticalPanel />
               <MT5Connector />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <RiskRewardPanel lotSize={lotSize} currentPrice={currentPrice} />
               <RiskSettings 
                 lotSize={lotSize} 
                 setLotSize={setLotSize} 
                 riskLevel={riskLevel} 
                 setRiskLevel={setRiskLevel} 
               />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
               <PerformanceAnalytics trades={trades} equityHistory={equityHistory} />
             </div>
             <div className="h-[400px]">
