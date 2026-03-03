@@ -9,7 +9,8 @@ import {
   Line, 
   Cell, 
   ReferenceLine,
-  Scatter
+  Scatter,
+  CartesianGrid
 } from 'recharts';
 import { Candle, Asset, Trade } from '../types/trading';
 import { Card } from './ui/card';
@@ -34,21 +35,21 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
     }));
 
   return (
-    <Card className="p-4 bg-slate-950 border-slate-800 h-[450px] relative overflow-hidden">
+    <Card className="p-4 bg-slate-950 border-slate-800 h-[500px] relative overflow-hidden">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
-          <h3 className="text-slate-200 font-semibold">{activeAsset} Live Execution</h3>
+          <h3 className="text-slate-200 font-semibold">{activeAsset} Advanced Terminal</h3>
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Live</span>
+            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Live Data</span>
           </div>
         </div>
         <div className="flex gap-4 text-[10px] uppercase font-bold tracking-tight">
           <span className="text-emerald-500 flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" /> Buy Signal
+            <div className="w-2 h-2 rounded-full bg-emerald-500" /> Buy
           </span>
           <span className="text-rose-500 flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-rose-500" /> Sell Signal
+            <div className="w-2 h-2 rounded-full bg-rose-500" /> Sell
           </span>
           <span className="text-amber-500 flex items-center gap-1">
             <div className="w-2 h-0.5 bg-amber-500" /> MA(7)
@@ -58,6 +59,7 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
 
       <ResponsiveContainer width="100%" height="90%">
         <ComposedChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
           <XAxis 
             dataKey="time" 
             stroke="#334155" 
@@ -81,7 +83,7 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
             formatter={(value: number) => [value.toFixed(precision + 1), 'Price']}
           />
           
-          <Bar dataKey="delta" yAxisId={0} opacity={0.15}>
+          <Bar dataKey="delta" yAxisId={0} opacity={0.1}>
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.delta > 0 ? '#10b981' : '#f43f5e'} />
             ))}
@@ -96,7 +98,6 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
             animationDuration={300}
           />
 
-          {/* Moving Average Line */}
           <Line 
             type="monotone" 
             dataKey="ma7" 
@@ -121,10 +122,7 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
             }} 
           />
 
-          <Scatter 
-            data={tradeMarkers} 
-            fill="#8884d8"
-          >
+          <Scatter data={tradeMarkers}>
             {tradeMarkers.map((entry, index) => (
               <Cell 
                 key={`trade-${index}`} 
@@ -138,14 +136,18 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
         </ComposedChart>
       </ResponsiveContainer>
       
-      <div className="absolute bottom-6 left-8 flex gap-4">
+      <div className="absolute bottom-6 left-8 flex gap-6">
         <div className="flex flex-col">
           <span className="text-[10px] text-slate-500 uppercase font-bold">Volatility</span>
-          <span className="text-xs font-mono text-slate-300">High</span>
+          <span className="text-xs font-mono text-emerald-400">Optimal</span>
         </div>
         <div className="flex flex-col">
           <span className="text-[10px] text-slate-500 uppercase font-bold">Spread</span>
-          <span className="text-xs font-mono text-slate-300">0.2 Pips</span>
+          <span className="text-xs font-mono text-slate-300">0.1 Pips</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-500 uppercase font-bold">Engine</span>
+          <span className="text-xs font-mono text-blue-400">Alpha-Pro v4.2</span>
         </div>
       </div>
     </Card>

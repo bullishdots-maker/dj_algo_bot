@@ -12,6 +12,8 @@ import EconomicCalendar from '../components/EconomicCalendar';
 import ManualControls from '../components/ManualControls';
 import NewsTicker from '../components/NewsTicker';
 import TechnicalAnalysis from '../components/TechnicalAnalysis';
+import RiskRewardPanel from '../components/RiskRewardPanel';
+import MT5Connector from '../components/MT5Connector';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
@@ -106,6 +108,10 @@ const Index = () => {
               <TechnicalAnalysis candles={candles} />
               <MarketSentiment sentiment={sentiment} />
               <EconomicCalendar />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <RiskRewardPanel lotSize={lotSize} currentPrice={currentPrice} />
+              <MT5Connector />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <RiskSettings 
