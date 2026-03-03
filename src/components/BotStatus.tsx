@@ -24,6 +24,7 @@ interface BotStatusProps {
 const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset }: BotStatusProps) => {
   const formatPrice = (price: number) => {
     if (activeAsset === 'XAG/USD') return price.toFixed(3);
+    if (activeAsset === 'XAU/USD') return price.toFixed(2);
     return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
@@ -46,6 +47,7 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
                 <SelectContent className="bg-slate-900 border-slate-800 text-white">
                   <SelectItem value="BTC/USD">Bitcoin (BTC/USD)</SelectItem>
                   <SelectItem value="ETH/USD">Ethereum (ETH/USD)</SelectItem>
+                  <SelectItem value="XAU/USD">Gold (XAU/USD)</SelectItem>
                   <SelectItem value="XAG/USD">Silver (XAG/USD)</SelectItem>
                 </SelectContent>
               </Select>

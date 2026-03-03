@@ -4,12 +4,14 @@ import { format } from 'date-fns';
 
 const SYMBOL_MAP: Record<Asset, string> = {
   'XAG/USD': 'xagusdt',
+  'XAU/USD': 'paxgusdt', // Using PAX Gold as proxy for XAU
   'BTC/USD': 'btcusdt',
   'ETH/USD': 'ethusdt',
 };
 
 const ASSET_CONFIG: Record<Asset, { lotSize: number; precision: number; pipValue: number }> = {
   'XAG/USD': { lotSize: 5000, precision: 3, pipValue: 0.01 },
+  'XAU/USD': { lotSize: 100, precision: 2, pipValue: 0.1 },
   'BTC/USD': { lotSize: 1, precision: 2, pipValue: 1 },
   'ETH/USD': { lotSize: 10, precision: 2, pipValue: 1 },
 };

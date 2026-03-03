@@ -17,18 +17,21 @@ import MT5Connector from '../components/MT5Connector';
 import GeoPoliticalPanel from '../components/GeoPoliticalPanel';
 import MarketDepth from '../components/MarketDepth';
 import SystemLogs from '../components/SystemLogs';
+import TradingViewChart from '../components/TradingViewChart';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
 import { toast } from "sonner";
-import { Download, User } from 'lucide-react';
+import { Download, User, Layout, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
   const [activeAsset, setActiveAsset] = useState<Asset>('BTC/USD');
   const [lotSize, setLotSize] = useState(1.0);
   const [riskLevel, setRiskLevel] = useState(50);
+  const [viewMode, setViewMode] = useState<'standard' | 'tradingview'>('standard');
   
   const { 
     candles, 
@@ -69,14 +72,16 @@ const Index = () => {
 
         <div className="flex justify-between items-end">
           <AccountOverview account={account} />
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleExportCSV}
-            className="border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
-          >
-            <Download className="mr-2 h-4 w-4" /> Export History
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleExportCSV}
+              className="border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
+            >
+              <Download className="mr-2 h-4 w-4" /> Export History
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -101,12 +106,39 @@ const Index = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-6">
-            <PriceChart 
-              data={candles} 
-              activeAsset={activeAsset} 
-              trades={trades}
-              currentPrice={currentPrice}
-            />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest">Terminal View</h3>
+                <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800">
+                  <button 
+                    onClick={() => setViewMode('standard')}
+                    className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all flex items-center gap-2 ${viewMode === 'standard' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                    <Layout size={12} /> Standard
+                  </button>
+                  <button 
+                    onClick={() => setViewMode('tradingview')}
+                    className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all flex items-center gap-2 ${viewMode === 'tradingview' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                    <BarChart3 size={12} /> TradingView
+                  </button>
+                </div>
+              </div>
+
+              {viewMode === 'standard' ? (
+                <PriceChart 
+                  data={candles} 
+                  activeAsset={activeAsset} 
+                  trades={trades}
+                  currentPrice={currentPrice}
+                />
+              ) : (
+                <div className="h-[500px]">
+                  <TradingViewChart asset={activeAsset} />
+                </div>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <TechnicalAnalysis candles={candles} />
               <MarketSentiment sentiment={sentiment} />
