@@ -22,7 +22,7 @@ import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
 import { toast } from "sonner";
-import { Download, User, Layout, BarChart3 } from 'lucide-react';
+import { Download, User, Layout, BarChart3, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -48,7 +48,7 @@ const Index = () => {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.setAttribute("download", `trade_history_${new Date().getTime()}.csv`);
+    link.setAttribute("download", `DJ_ALGO_History_${new Date().getTime()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -56,22 +56,24 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#02040a] text-slate-200 font-sans selection:bg-blue-500/30">
       <NewsTicker news={news} />
       
-      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         <Header />
 
-        <div className="flex justify-between items-end">
-          <AccountOverview account={account} />
-          <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="flex-1 w-full">
+            <AccountOverview account={account} />
+          </div>
+          <div className="flex gap-3">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={handleExportCSV}
-              className="border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
+              className="border-slate-800 bg-slate-950 text-slate-400 hover:text-white hover:border-slate-600 transition-all"
             >
-              <Download className="mr-2 h-4 w-4" /> Export History
+              <Download className="mr-2 h-4 w-4" /> Export Data
             </Button>
           </div>
         </div>
@@ -97,38 +99,43 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-8">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest">Terminal View</h3>
-                <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800">
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 bg-blue-500 rounded-full" />
+                  <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Market Terminal</h3>
+                </div>
+                <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800 backdrop-blur-sm">
                   <button 
                     onClick={() => setViewMode('standard')}
-                    className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all flex items-center gap-2 ${viewMode === 'standard' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-2 ${viewMode === 'standard' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:text-slate-300'}`}
                   >
                     <Layout size={12} /> Standard
                   </button>
                   <button 
                     onClick={() => setViewMode('tradingview')}
-                    className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all flex items-center gap-2 ${viewMode === 'tradingview' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-2 ${viewMode === 'tradingview' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:text-slate-300'}`}
                   >
                     <BarChart3 size={12} /> TradingView
                   </button>
                 </div>
               </div>
 
-              {viewMode === 'standard' ? (
-                <PriceChart 
-                  data={candles} 
-                  activeAsset={activeAsset} 
-                  trades={trades}
-                  currentPrice={currentPrice}
-                />
-              ) : (
-                <div className="h-[500px]">
-                  <TradingViewChart asset={activeAsset} />
-                </div>
-              )}
+              <div className="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+                {viewMode === 'standard' ? (
+                  <PriceChart 
+                    data={candles} 
+                    activeAsset={activeAsset} 
+                    trades={trades}
+                    currentPrice={currentPrice}
+                  />
+                ) : (
+                  <div className="h-[500px]">
+                    <TradingViewChart asset={activeAsset} />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -152,29 +159,36 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
               <PerformanceAnalytics trades={trades} equityHistory={equityHistory} />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[400px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[450px]">
               <TradeLog trades={trades} />
               <SystemLogs isActive={isActive} />
             </div>
           </div>
 
           <div className="lg:col-span-4 space-y-6">
-            <div className="h-[400px]">
+            <div className="h-[450px] shadow-2xl">
               <MarketDepth activeAsset={activeAsset} currentPrice={currentPrice} />
             </div>
-            <div className="h-[calc(100vh-600px)] min-h-[400px]">
+            <div className="h-[calc(100vh-600px)] min-h-[500px] shadow-2xl">
               <OrderFlowTape orders={orders} activeAsset={activeAsset} />
             </div>
           </div>
         </div>
 
-        <footer className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <User size={12} />
-            <span>© 2024 AlgoBot Pro. Developed by <span className="text-slate-300 font-bold">DJ trades</span>.</span>
+        <footer className="pt-12 pb-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+            <div className="p-1.5 rounded-lg bg-slate-900 border border-slate-800">
+              <ShieldCheck size={14} className="text-blue-500" />
+            </div>
+            <span>© 2024 DJ ALGO BOT. Developed by <span className="text-slate-200 font-bold">Dikshil Jagani</span>.</span>
           </div>
-          <div className="text-[10px] font-bold text-slate-700 uppercase tracking-[0.3em] animate-pulse">
-            Dikshil Jagani - The Man Behind This Bot
+          <div className="flex flex-col items-center md:items-end gap-1">
+            <div className="text-[10px] font-black text-slate-700 uppercase tracking-[0.4em] animate-pulse">
+              The Man Behind The Machine
+            </div>
+            <div className="text-[9px] font-bold text-blue-500/50 uppercase tracking-widest">
+              Dikshil Jagani - Quantitative Engineer
+            </div>
           </div>
           <MadeWithDyad />
         </footer>
