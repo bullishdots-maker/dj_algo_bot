@@ -5,6 +5,8 @@ import OrderFlowTape from '../components/OrderFlowTape';
 import BotStatus from '../components/BotStatus';
 import TradeLog from '../components/TradeLog';
 import AccountOverview from '../components/AccountOverview';
+import RiskSettings from '../components/RiskSettings';
+import PerformanceAnalytics from '../components/PerformanceAnalytics';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
 import { toast } from "sonner";
@@ -12,6 +14,9 @@ import { toast } from "sonner";
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
   const [activeAsset, setActiveAsset] = useState<Asset>('EUR/USD');
+  const [lotSize, setLotSize] = useState(1.0);
+  const [riskLevel, setRiskLevel] = useState(50);
+  
   const { candles, trades, orders, currentPrice, account } = useTradingSim(isActive, activeAsset);
 
   // Notify on new trade execution
@@ -32,8 +37,8 @@ const Index = () => {
         <AccountOverview account={account} />
 
         {/* Header & Controls */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8">
             <BotStatus 
               isActive={isActive} 
               setIsActive={setIsActive} 
@@ -42,7 +47,7 @@ const Index = () => {
               setActiveAsset={setActiveAsset}
             />
           </div>
-          <div className="hidden lg:block">
+          <div className="lg:col-span-4">
             <div className="h-full p-6 rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/20 flex flex-col justify-center">
               <h4 className="text-blue-400 font-bold uppercase tracking-widest text-[10px] mb-2">System Health</h4>
               <div className="flex items-center gap-2 mb-4">
@@ -64,7 +69,7 @@ const Index = () => {
 
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: Chart & Log */}
+          {/* Left Column: Chart & Log */}
           <div className="lg:col-span-8 space-y-6">
             <PriceChart 
               data={candles} 
@@ -72,14 +77,25 @@ const Index = () => {
               trades={trades}
               currentPrice={currentPrice}
             />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <RiskSettings 
+                lotSize={lotSize} 
+                setLotSize={setLotSize} 
+                riskLevel={riskLevel} 
+                setRiskLevel={setRiskLevel} 
+              />
+              <PerformanceAnalytics trades={trades} />
+            </div>
             <div className="h-[400px]">
               <TradeLog trades={trades} />
             </div>
           </div>
 
-          {/* Right: Order Flow Tape */}
-          <div className="lg:col-span-4 h-[874px]">
-            <OrderFlowTape orders={orders} activeAsset={activeAsset} />
+          {/* Right Column: Order Flow Tape */}
+          <div className="lg:col-span-4 h-full">
+            <div className="sticky top-6 h-[calc(100vh-100px)]">
+              <OrderFlowTape orders={orders} activeAsset={activeAsset} />
+            </div>
           </div>
         </div>
 
