@@ -24,7 +24,6 @@ import { Asset } from '../types/trading';
 import { toast } from "sonner";
 import { Download, User, Layout, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
@@ -34,15 +33,8 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<'standard' | 'tradingview'>('standard');
   
   const { 
-    candles, 
-    trades, 
-    orders, 
-    currentPrice, 
-    account, 
-    sentiment, 
-    equityHistory,
-    executeManualTrade, 
-    closeTrade 
+    candles, trades, orders, currentPrice, account, sentiment, equityHistory,
+    news, geoEvents, ecoEvents, executeManualTrade, closeTrade 
   } = useTradingSim(isActive, activeAsset);
 
   const openTrades = trades.filter(t => t.status === 'OPEN');
@@ -65,7 +57,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30">
-      <NewsTicker />
+      <NewsTicker news={news} />
       
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
         <Header />
@@ -142,10 +134,10 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <TechnicalAnalysis candles={candles} />
               <MarketSentiment sentiment={sentiment} />
-              <EconomicCalendar />
+              <EconomicCalendar events={ecoEvents} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <GeoPoliticalPanel />
+              <GeoPoliticalPanel events={geoEvents} />
               <MT5Connector />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -3,13 +3,11 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Calendar, AlertTriangle, Clock } from 'lucide-react';
 
-const EconomicCalendar = () => {
-  const events = [
-    { time: '14:30', currency: 'USD', event: 'Core CPI m/m', impact: 'HIGH', forecast: '0.3%', actual: '-' },
-    { time: '16:00', currency: 'USD', event: 'Consumer Confidence', impact: 'MED', forecast: '103.9', actual: '-' },
-    { time: '18:30', currency: 'EUR', event: 'ECB President Lagarde Speaks', impact: 'HIGH', forecast: '-', actual: '-' },
-  ];
+interface EconomicCalendarProps {
+  events: any[];
+}
 
+const EconomicCalendar = ({ events }: EconomicCalendarProps) => {
   return (
     <Card className="p-6 bg-slate-950 border-slate-800">
       <div className="flex items-center gap-2 mb-6">
@@ -44,13 +42,6 @@ const EconomicCalendar = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="mt-4 p-2 rounded bg-amber-500/5 border border-amber-500/20 flex gap-2 items-start">
-        <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
-        <p className="text-[9px] text-amber-200/70 leading-tight">
-          High impact news expected in 2 hours. Volatility may increase significantly.
-        </p>
       </div>
     </Card>
   );

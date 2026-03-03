@@ -4,31 +4,11 @@ import { Badge } from './ui/badge';
 import { Globe, Twitter, ShieldAlert, Zap, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const GeoPoliticalPanel = () => {
-  const events = [
-    { 
-      type: 'CONFLICT', 
-      title: 'Middle East Tensions', 
-      desc: 'Escalation in Red Sea shipping lanes reported.', 
-      impact: 'CRITICAL',
-      time: '12m ago'
-    },
-    { 
-      type: 'SOCIAL', 
-      title: 'Trump Alert', 
-      desc: '"TARIFFS ARE THE GREATEST THING EVER MADE! CHINA WILL PAY!"', 
-      impact: 'HIGH',
-      time: '45m ago'
-    },
-    { 
-      type: 'EVENT', 
-      title: 'G7 Emergency Summit', 
-      desc: 'Leaders meeting to discuss global trade sanctions.', 
-      impact: 'MED',
-      time: '2h ago'
-    }
-  ];
+interface GeoPoliticalPanelProps {
+  events: any[];
+}
 
+const GeoPoliticalPanel = ({ events }: GeoPoliticalPanelProps) => {
   return (
     <Card className="p-6 bg-slate-950 border-slate-800">
       <div className="flex items-center justify-between mb-6">
@@ -38,13 +18,13 @@ const GeoPoliticalPanel = () => {
         </div>
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20">
           <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-          <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">High Volatility Risk</span>
+          <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Live Intel Feed</span>
         </div>
       </div>
 
       <div className="space-y-4">
         {events.map((event, i) => (
-          <div key={i} className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 space-y-2">
+          <div key={i} className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 space-y-2 animate-in fade-in slide-in-from-top-2 duration-500">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2">
                 {event.type === 'CONFLICT' && <ShieldAlert size={14} className="text-rose-500" />}
@@ -71,24 +51,9 @@ const GeoPoliticalPanel = () => {
               )}>
                 {event.impact} IMPACT
               </Badge>
-              {event.type === 'SOCIAL' && (
-                <div className="flex items-center gap-1 text-[10px] text-slate-600">
-                  <MessageSquare size={10} /> 12.4k
-                </div>
-              )}
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="mt-6 pt-4 border-t border-slate-900">
-        <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase">
-          <span>Global Risk Index</span>
-          <span className="text-rose-400">78/100</span>
-        </div>
-        <div className="mt-2 h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 w-[78%]" />
-        </div>
       </div>
     </Card>
   );

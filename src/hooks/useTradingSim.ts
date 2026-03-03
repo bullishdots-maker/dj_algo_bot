@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Candle, Trade, MarketOrder, AccountStats, Asset } from '../types/trading';
-import { format } from 'date-fns';
+import { format, addMinutes } from 'date-fns';
 
 const SYMBOL_MAP: Record<Asset, string> = {
   'XAG/USD': 'xagusdt',
-  'XAU/USD': 'paxgusdt', // Using PAX Gold as proxy for XAU
+  'XAU/USD': 'paxgusdt',
   'BTC/USD': 'btcusdt',
   'ETH/USD': 'ethusdt',
 };
@@ -39,6 +39,20 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
   const [orders, setOrders] = useState<MarketOrder[]>([]);
   const [sentiment, setSentiment] = useState<number>(50);
   const [equityHistory, setEquityHistory] = useState<{time: string, equity: number}[]>([]);
+  const [news, setNews] = useState<string[]>([
+    "FED CHAIR POWELL HINTS AT POTENTIAL RATE CUTS IN Q3",
+    "BITCOIN WHALE MOVES $500M TO COLD STORAGE",
+    "ECB MAINTAINS INTEREST RATES AMID INFLATION CONCERNS"
+  ]);
+  const [geoEvents, setGeoEvents] = useState<any[]>([
+    { type: 'CONFLICT', title: 'Middle East Tensions', desc: 'Escalation in Red Sea shipping lanes reported.', impact: 'CRITICAL', time: '12m ago' },
+    { type: 'SOCIAL', title: 'Market Alert', desc: 'Unusual options activity detected in Tech sector.', impact: 'HIGH', time: '45m ago' }
+  ]);
+  const [ecoEvents, setEcoEvents] = useState<any[]>([
+    { time: format(addMinutes(new Date(), 30), 'HH:mm'), currency: 'USD', event: 'Core CPI m/m', impact: 'HIGH', forecast: '0.3%', actual: '-' },
+    { time: format(addMinutes(new Date(), 120), 'HH:mm'), currency: 'EUR', event: 'ECB President Speaks', impact: 'HIGH', forecast: '-', actual: '-' }
+  ]);
+
   const [account, setAccount] = useState<AccountStats>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -64,6 +78,31 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ account, trades, equityHistory }));
     tradesRef.current = trades;
   }, [account, trades, equityHistory]);
+
+  // Dynamic News & Events Simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newsPool = [
+        "US RETAIL SALES EXCEED EXPECTATIONS, DOLLAR STRENGTHENS",
+        "TECH STOCKS RALLY AS AI DEMAND CONTINUES TO SURGE",
+        "OIL PRICES STABILIZE AFTER OPEC+ MEETING",
+        "JAPANESE YEN WEAKENS AGAINST MAJOR CURRENCIES",
+        "SEC REVIEWS NEW CRYPTO ETF APPLICATIONS",
+        "GOLD HITS NEW ALL-TIME HIGH AMID INFLATION FEARS"
+      ];
+      setNews(prev => [newsPool[Math.floor(Math.random() * newsPool.length)], ...prev].slice(0, 10));
+
+      if (Math.random() > 0.7) {
+        const geoPool = [
+          { type: 'CONFLICT', title: 'Border Dispute', desc: 'New tensions reported in Eastern Europe.', impact: 'HIGH', time: 'Just now' },
+          { type: 'SOCIAL', title: 'Elon Musk Tweet', desc: '"Doge to the moon? Maybe not today."', impact: 'MED', time: '1m ago' },
+          { type: 'EVENT', title: 'G7 Emergency', desc: 'Leaders discuss global trade sanctions.', impact: 'CRITICAL', time: '2m ago' }
+        ];
+        setGeoEvents(prev => [geoPool[Math.floor(Math.random() * geoPool.length)], ...prev].slice(0, 5));
+      }
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const executeManualTrade = useCallback((type: 'BUY' | 'SELL', price: number, reason: string = 'Manual Execution') => {
     const newTrade: Trade = {
@@ -117,17 +156,24 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
       const data = JSON.parse(event.data);
       if (data.e === '24hrTicker') {
         setCurrentPrice(parseFloat(data.c));
-        if (Math.random() > 0.8) {
+        if (Math.random() > 0.5) { // Increased frequency for dynamic feel
           const newOrder: MarketOrder = {
             id: Math.random().toString(36).substr(2, 9),
             asset: activeAsset,
             time: format(new Date(), 'HH:mm:ss'),
             price: parseFloat(data.c),
-            size: Math.floor(Math.random() * 5) + 1,
+            size: Number((Math.random() * (activeAsset === 'BTC/USD' ? 0.5 : 10)).toFixed(2)),
             side: Math.random() > 0.5 ? 'BUY' : 'SELL',
-            imbalance: Math.random() > 0.95,
+            imbalance: Math.random() > 0.9,
           };
-          setOrders(prev => [newOrder, ...prev].slice(0, 30));
+          setOrders(prev => [newOrder, ...prev].slice(0, 50));
+          
+          // Update sentiment based on orders
+          setSentiment(prev => {
+            const buyWeight = newOrder.side === 'BUY' ? 1 : -1;
+            const next = prev + (buyWeight * 0.5);
+            return Math.min(Math.max(next, 20), 80);
+          });
         }
       }
 
@@ -206,5 +252,8 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
     });
   }, [currentPrice, trades]);
 
-  return { candles, trades, orders, currentPrice, account, sentiment, equityHistory, executeManualTrade, closeTrade };
+  return { 
+    candles, trades, orders, currentPrice, account, sentiment, equityHistory, 
+    news, geoEvents, ecoEvents, executeManualTrade, closeTrade 
+  };
 };
