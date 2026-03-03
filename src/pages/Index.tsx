@@ -29,6 +29,9 @@ import LiquidityHeatmap from '../components/LiquidityHeatmap';
 import PortfolioAllocation from '../components/PortfolioAllocation';
 import NeuralNarrative from '../components/NeuralNarrative';
 import WhaleTracker from '../components/WhaleTracker';
+import StrategyCustomizer from '../components/StrategyCustomizer';
+import TradingJournal from '../components/TradingJournal';
+import AlertsPanel from '../components/AlertsPanel';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
@@ -174,7 +177,7 @@ const Index = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <TechnicalAnalysis candles={candles} />
-              <MT5Connector />
+              <StrategyCustomizer />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <RiskRewardPanel lotSize={lotSize} currentPrice={currentPrice} />
@@ -189,7 +192,7 @@ const Index = () => {
               <PerformanceAnalytics trades={trades} equityHistory={equityHistory} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[450px]">
-              <TradeLog trades={trades} />
+              <TradingJournal trades={trades} />
               <SystemLogs isActive={isActive} />
             </div>
           </div>
@@ -200,6 +203,7 @@ const Index = () => {
               onSelect={setActiveAsset} 
               currentPrice={currentPrice} 
             />
+            <AlertsPanel />
             <div className="h-[400px] shadow-2xl">
               <WhaleTracker />
             </div>
