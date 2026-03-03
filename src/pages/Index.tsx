@@ -11,6 +11,7 @@ import MarketSentiment from '../components/MarketSentiment';
 import EconomicCalendar from '../components/EconomicCalendar';
 import ManualControls from '../components/ManualControls';
 import NewsTicker from '../components/NewsTicker';
+import TechnicalAnalysis from '../components/TechnicalAnalysis';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset, Strategy } from '../types/trading';
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ const Index = () => {
     currentPrice, 
     account, 
     sentiment, 
+    equityHistory,
     executeManualTrade, 
     closeTrade 
   } = useTradingSim(isActive, activeAsset, strategy);
@@ -100,7 +102,8 @@ const Index = () => {
               trades={trades}
               currentPrice={currentPrice}
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TechnicalAnalysis candles={candles} />
               <MarketSentiment sentiment={sentiment} />
               <EconomicCalendar />
             </div>
@@ -111,7 +114,7 @@ const Index = () => {
                 riskLevel={riskLevel} 
                 setRiskLevel={setRiskLevel} 
               />
-              <PerformanceAnalytics trades={trades} />
+              <PerformanceAnalytics trades={trades} equityHistory={equityHistory} />
             </div>
             <div className="h-[400px]">
               <TradeLog trades={trades} />

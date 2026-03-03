@@ -1,13 +1,15 @@
 import React from 'react';
 import { Card } from './ui/card';
 import { Trade } from '../types/trading';
-import { TrendingUp, TrendingDown, Activity, Award } from 'lucide-react';
+import { Activity, Award, TrendingUp } from 'lucide-react';
+import { ResponsiveContainer, LineChart, Line, YAxis, XAxis, Tooltip } from 'recharts';
 
 interface PerformanceAnalyticsProps {
   trades: Trade[];
+  equityHistory: {time: string, equity: number}[];
 }
 
-const PerformanceAnalytics = ({ trades }: PerformanceAnalyticsProps) => {
+const PerformanceAnalytics = ({ trades, equityHistory }: PerformanceAnalyticsProps) => {
   const closedTrades = trades.filter(t => t.status === 'CLOSED');
   const wins = closedTrades.filter(t => (t.pnl || 0) > 0);
   const losses = closedTrades.filter(t => (t.pnl || 0) <= 0);
@@ -21,9 +23,35 @@ const PerformanceAnalytics = ({ trades }: PerformanceAnalyticsProps) => {
 
   return (
     <Card className="p-6 bg-slate-950 border-slate-800">
-      <div className="flex items-center gap-2 mb-6">
-        <Activity className="text-purple-400" size={20} />
-        <h3 className="text-slate-200 font-semibold">Advanced Analytics</h3>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Activity className="text-purple-400" size={20} />
+          <h3 className="text-slate-200 font-semibold">Advanced Analytics</h3>
+        </div>
+        <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase">
+          <TrendingUp size={12} /> Equity Curve
+        </div>
+      </div>
+
+      <div className="h-32 w-full mb-6">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={equityHistory}>
+            <XAxis dataKey="time" hide />
+            <YAxis domain={['auto', 'auto']} hide />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '4px', fontSize: '10px' }}
+              labelStyle={{ display: 'none' }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="equity" 
+              stroke="#8b5cf6" 
+              strokeWidth={2} 
+              dot={false} 
+              animationDuration={300}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

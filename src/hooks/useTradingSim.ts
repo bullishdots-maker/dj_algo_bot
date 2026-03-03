@@ -14,7 +14,21 @@ const ASSET_CONFIG: Record<Asset, { lotSize: number; precision: number }> = {
   'BTC/USD': { lotSize: 1, precision: 2 },
 };
 
-const STORAGE_KEY = 'trading_sim_data_v2';
+const STORAGE_KEY = 'trading_sim_data_v3';
+
+// Helper to calculate RSI
+const calculateRSI = (candles: Candle[], period: number = 14) => {
+  if (candles.length <= period) return 50;
+  let gains = 0;
+  let losses = 0;
+  for (let i = candles.length - period; i < candles.length; i++) {
+    const diff = candles[i].close - candles[i].open;
+    if (diff >= 0) gains += diff;
+    else losses -= diff;
+  }
+  const rs = gains / losses;
+  return 100 - (100 / (1 + rs));
+};
 
 export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: Strategy = 'MEAN_REVERSION') => {
   const [candles, setCandles] = useState<Candle[]>([]);
@@ -22,6 +36,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
   const [trades, setTrades] = useState<Trade[]>([]);
   const [orders, setOrders] = useState<MarketOrder[]>([]);
   const [sentiment, setSentiment] = useState<number>(50);
+  const [equityHistory, setEquityHistory] = useState<{time: string, equity: number}[]>([]);
   const [account, setAccount] = useState<AccountStats>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -39,13 +54,14 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
       const parsed = JSON.parse(saved);
       setTrades(parsed.trades || []);
       tradesRef.current = parsed.trades || [];
+      setEquityHistory(parsed.equityHistory || []);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ account, trades }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ account, trades, equityHistory }));
     tradesRef.current = trades;
-  }, [account, trades]);
+  }, [account, trades, equityHistory]);
 
   const executeManualTrade = useCallback((type: 'BUY' | 'SELL', price: number) => {
     const newTrade: Trade = {
@@ -129,6 +145,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
               const last7 = updated.slice(-7);
               newCandle.ma7 = last7.reduce((acc, c) => acc + c.close, 0) / 7;
             }
+            newCandle.rsi = calculateRSI(updated);
             return updated;
           });
           if (isActive) processBotLogic(activeAsset, newCandle, strategy);
@@ -155,12 +172,11 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
     const isBullish = candle.close > candle.open;
     
     if (strat === 'MEAN_REVERSION') {
-      const isOversold = !isBullish && bodySize > (candle.high - candle.low) * 0.7;
-      const isOverbought = isBullish && bodySize > (candle.high - candle.low) * 0.7;
+      const isOversold = (candle.rsi && candle.rsi < 30) || (!isBullish && bodySize > (candle.high - candle.low) * 0.7);
+      const isOverbought = (candle.rsi && candle.rsi > 70) || (isBullish && bodySize > (candle.high - candle.low) * 0.7);
       if (isOversold) executeManualTrade('BUY', candle.close);
       else if (isOverbought) executeManualTrade('SELL', candle.close);
     } else {
-      // Trend Following
       const isStrongTrend = bodySize > (candle.high - candle.low) * 0.5;
       if (isStrongTrend && isBullish) executeManualTrade('BUY', candle.close);
       else if (isStrongTrend && !isBullish) executeManualTrade('SELL', candle.close);
@@ -172,8 +188,16 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
       const diff = currentPrice - t.price;
       return acc + ((t.type === 'BUY' ? diff : -diff) * ASSET_CONFIG[t.asset].lotSize);
     }, 0);
-    setAccount(prev => ({ ...prev, equity: prev.balance + openTradesPnl }));
+    const newEquity = account.balance + openTradesPnl;
+    setAccount(prev => ({ ...prev, equity: newEquity }));
+
+    // Update equity history every 10 seconds if price changes
+    const now = format(new Date(), 'HH:mm:ss');
+    setEquityHistory(prev => {
+      if (prev.length > 0 && prev[prev.length - 1].time === now) return prev;
+      return [...prev.slice(-49), { time: now, equity: newEquity }];
+    });
   }, [currentPrice, trades]);
 
-  return { candles, trades, orders, currentPrice, account, sentiment, executeManualTrade, closeTrade };
+  return { candles, trades, orders, currentPrice, account, sentiment, equityHistory, executeManualTrade, closeTrade };
 };
