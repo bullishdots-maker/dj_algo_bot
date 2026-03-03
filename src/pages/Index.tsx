@@ -24,6 +24,8 @@ import MarketWatchlist from '../components/MarketWatchlist';
 import SystemHealth from '../components/SystemHealth';
 import BacktestPanel from '../components/BacktestPanel';
 import SessionMap from '../components/SessionMap';
+import CorrelationMatrix from '../components/CorrelationMatrix';
+import LiquidityHeatmap from '../components/LiquidityHeatmap';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
@@ -148,6 +150,10 @@ const Index = () => {
               <NeuralMatrix weights={neuralWeights} />
               <MarketSentiment sentiment={sentiment} />
               <SystemHealth />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CorrelationMatrix />
+              <LiquidityHeatmap />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <BacktestPanel />
