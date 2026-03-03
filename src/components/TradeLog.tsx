@@ -27,57 +27,60 @@ const TradeLog = ({ trades }: TradeLogProps) => {
               <p className="text-sm">Waiting for market signals...</p>
             </div>
           )}
-          {trades.map((trade) => (
-            <div key={trade.id} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-2">
-                  {trade.type === 'BUY' ? (
-                    <TrendingUp className="text-emerald-500" size={18} />
-                  ) : (
-                    <TrendingDown className="text-rose-500" size={18} />
-                  )}
-                  <span className={trade.type === 'BUY' ? "text-emerald-500 font-bold" : "text-rose-500 font-bold"}>
-                    {trade.type} @ {trade.price.toFixed(5)}
-                  </span>
+          {trades.map((trade) => {
+            const precision = trade.asset === 'EUR/USD' ? 5 : 2;
+            return (
+              <div key={trade.id} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-2">
+                    {trade.type === 'BUY' ? (
+                      <TrendingUp className="text-emerald-500" size={18} />
+                    ) : (
+                      <TrendingDown className="text-rose-500" size={18} />
+                    )}
+                    <div className="flex flex-col">
+                      <span className={trade.type === 'BUY' ? "text-emerald-500 font-bold" : "text-rose-500 font-bold"}>
+                        {trade.type} {trade.asset}
+                      </span>
+                      <span className="text-[10px] text-slate-400">@ {trade.price.toFixed(precision)}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {trade.status === 'OPEN' ? (
+                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] flex gap-1 items-center">
+                        <Clock size={10} /> OPEN
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-slate-800 text-slate-400 border-slate-700 text-[10px] flex gap-1 items-center">
+                        <CheckCircle2 size={10} /> CLOSED
+                      </Badge>
+                    )}
+                    <span className="text-[10px] text-slate-500 font-mono">{trade.time}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {trade.status === 'OPEN' ? (
-                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] flex gap-1 items-center">
-                      <Clock size={10} /> OPEN
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-slate-800 text-slate-400 border-slate-700 text-[10px] flex gap-1 items-center">
-                      <CheckCircle2 size={10} /> CLOSED
-                    </Badge>
-                  )}
-                  <span className="text-[10px] text-slate-500 font-mono">{trade.time}</span>
-                </div>
-              </div>
-              
-              <p className="text-xs text-slate-400 leading-relaxed">
-                {trade.reason}
-              </p>
+                
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  {trade.reason}
+                </p>
 
-              <div className="flex justify-between items-center pt-1">
-                <div className="flex gap-2">
-                  <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px]">
-                    SL: {(trade.price - (trade.type === 'BUY' ? 0.0010 : -0.0010)).toFixed(5)}
-                  </Badge>
-                  <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
-                    TP: {(trade.price + (trade.type === 'BUY' ? 0.0020 : -0.0020)).toFixed(5)}
-                  </Badge>
+                <div className="flex justify-between items-center pt-1">
+                  <div className="flex gap-2">
+                    <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px]">
+                      SL: {(trade.price - (trade.type === 'BUY' ? (trade.asset === 'EUR/USD' ? 0.0010 : 2.0) : (trade.asset === 'EUR/USD' ? -0.0010 : -2.0))).toFixed(precision)}
+                    </Badge>
+                  </div>
+                  {trade.status === 'CLOSED' && (
+                    <span className={cn(
+                      "text-xs font-mono font-bold",
+                      (trade.pnl || 0) >= 0 ? "text-emerald-400" : "text-rose-400"
+                    )}>
+                      {(trade.pnl || 0) >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
+                    </span>
+                  )}
                 </div>
-                {trade.status === 'CLOSED' && (
-                  <span className={cn(
-                    "text-xs font-mono font-bold",
-                    (trade.pnl || 0) >= 0 ? "text-emerald-400" : "text-rose-400"
-                  )}>
-                    {(trade.pnl || 0) >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
-                  </span>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </ScrollArea>
     </Card>

@@ -1,3 +1,5 @@
+export type Asset = 'EUR/USD' | 'XAU/USD' | 'XAG/USD';
+
 export interface Candle {
   time: string;
   open: number;
@@ -10,17 +12,19 @@ export interface Candle {
 
 export interface Trade {
   id: string;
+  asset: Asset;
   time: string;
   type: 'BUY' | 'SELL';
   price: number;
   reason: string;
   status: 'OPEN' | 'CLOSED';
-  pnl?: number; // Profit or Loss
+  pnl?: number;
   exitPrice?: number;
 }
 
 export interface MarketOrder {
   id: string;
+  asset: Asset;
   time: string;
   price: number;
   size: number;

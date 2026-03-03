@@ -6,10 +6,12 @@ import BotStatus from '../components/BotStatus';
 import TradeLog from '../components/TradeLog';
 import AccountOverview from '../components/AccountOverview';
 import { MadeWithDyad } from "@/components/made-with-dyad";
+import { Asset } from '../types/trading';
 
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
-  const { candles, trades, orders, currentPrice, account } = useTradingSim(isActive);
+  const [activeAsset, setActiveAsset] = useState<Asset>('EUR/USD');
+  const { candles, trades, orders, currentPrice, account } = useTradingSim(isActive, activeAsset);
 
   return (
     <div className="min-h-screen bg-black text-slate-200 p-4 md:p-8 font-sans selection:bg-blue-500/30">
@@ -23,7 +25,9 @@ const Index = () => {
             <BotStatus 
               isActive={isActive} 
               setIsActive={setIsActive} 
-              currentPrice={currentPrice} 
+              currentPrice={currentPrice}
+              activeAsset={activeAsset}
+              setActiveAsset={setActiveAsset}
             />
           </div>
           <div className="hidden lg:block">
@@ -50,7 +54,7 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Chart & Log */}
           <div className="lg:col-span-8 space-y-6">
-            <PriceChart data={candles} />
+            <PriceChart data={candles} activeAsset={activeAsset} />
             <div className="h-[400px]">
               <TradeLog trades={trades} />
             </div>
@@ -58,7 +62,7 @@ const Index = () => {
 
           {/* Right: Order Flow Tape */}
           <div className="lg:col-span-4 h-[824px]">
-            <OrderFlowTape orders={orders} />
+            <OrderFlowTape orders={orders} activeAsset={activeAsset} />
           </div>
         </div>
 
