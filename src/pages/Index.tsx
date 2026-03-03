@@ -20,6 +20,8 @@ import SystemLogs from '../components/SystemLogs';
 import TradingViewChart from '../components/TradingViewChart';
 import NeuralMatrix from '../components/NeuralMatrix';
 import QuantChat from '../components/QuantChat';
+import MarketWatchlist from '../components/MarketWatchlist';
+import SystemHealth from '../components/SystemHealth';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
@@ -143,7 +145,7 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <NeuralMatrix weights={neuralWeights} />
               <MarketSentiment sentiment={sentiment} />
-              <EconomicCalendar events={ecoEvents} />
+              <SystemHealth />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <GeoPoliticalPanel events={geoEvents} />
@@ -172,6 +174,11 @@ const Index = () => {
           </div>
 
           <div className="lg:col-span-4 space-y-6">
+            <MarketWatchlist 
+              activeAsset={activeAsset} 
+              onSelect={setActiveAsset} 
+              currentPrice={currentPrice} 
+            />
             <div className="h-[450px] shadow-2xl">
               <MarketDepth activeAsset={activeAsset} currentPrice={currentPrice} />
             </div>
