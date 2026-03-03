@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Candle, Trade, MarketOrder, AccountStats, Asset } from '../types/trading';
+import { Candle, Trade, MarketOrder, AccountStats, Asset, Strategy } from '../types/trading';
 import { format, addMinutes } from 'date-fns';
 
 const SYMBOL_MAP: Record<Asset, string> = {
@@ -32,7 +32,7 @@ const calculateRSI = (candles: Candle[], period: number = 14) => {
   return 100 - (100 / (1 + rs));
 };
 
-export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
+export const useTradingSim = (isActive: boolean, activeAsset: Asset, activeStrategy: Strategy = 'MEAN_REVERSION') => {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [currentPrice, setCurrentPrice] = useState<number>(0);
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -89,7 +89,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
     tradesRef.current = trades;
   }, [account, trades, equityHistory]);
 
-  // Dynamic News & Events Simulation - Increased frequency
   useEffect(() => {
     const interval = setInterval(() => {
       const newsPool = [
@@ -114,7 +113,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
         setGeoEvents(prev => [geoPool[Math.floor(Math.random() * geoPool.length)], ...prev].slice(0, 5));
       }
 
-      // Quant Chat Simulation - More frequent
       if (Math.random() > 0.4) {
         const chatPool = [
           { user: 'Macro_King', msg: 'Yield curve inversion deepening. Risk off.', type: 'BEAR' },
@@ -127,7 +125,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
         setQuantChat(prev => [{ ...msg, time: 'Just now' }, ...prev].slice(0, 10));
       }
 
-      // Neural Weights Simulation - Constant jitter
       setNeuralWeights({
         rsi: Math.random(),
         trend: Math.random(),
@@ -135,7 +132,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
         sentiment: Math.random()
       });
 
-    }, 5000); // Faster updates
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -192,7 +189,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
       if (data.e === '24hrTicker') {
         setCurrentPrice(parseFloat(data.c));
         
-        // More frequent order flow simulation
         if (Math.random() > 0.3) {
           const newOrder: MarketOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -246,7 +242,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
       }
     };
     return () => ws.close();
-  }, [activeAsset, isActive]);
+  }, [activeAsset, isActive, activeStrategy]);
 
   const processAlphaProLogic = useCallback((asset: Asset, candle: Candle) => {
     const openTrades = tradesRef.current.filter(t => t.status === 'OPEN' && t.asset === asset && !t.isManual);
@@ -256,7 +252,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
       const pnl = trade.type === 'BUY' ? (candle.close - trade.price) : (trade.price - candle.close);
       const pips = pnl / ASSET_CONFIG[asset].pipValue;
       
-      // Dynamic exit logic
       if (pips > 15 || pips < -8) { 
         closeTrade(trade.id, candle.close);
       }
@@ -267,13 +262,40 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
     const ma7 = candle.ma7 || candle.close;
     const isBullishTrend = candle.close > ma7;
 
-    // More sensitive entry logic for simulation
-    if (rsi < 35 && isBullishTrend && candle.delta > 0) {
-      executeManualTrade('BUY', candle.close, 'Alpha-Pro: Bullish Reversal');
-    } else if (rsi > 65 && !isBullishTrend && candle.delta < 0) {
-      executeManualTrade('SELL', candle.close, 'Alpha-Pro: Bearish Reversal');
+    if (activeStrategy === 'FIB_RETRACEMENT') {
+      // Fibonacci Retracement Logic
+      // Identify recent swing high/low from last 20 candles
+      const recentCandles = candles.slice(-20);
+      if (recentCandles.length < 20) return;
+
+      const high = Math.max(...recentCandles.map(c => c.high));
+      const low = Math.min(...recentCandles.map(c => c.low));
+      const range = high - low;
+
+      // Golden Pocket (0.618)
+      const fib618Buy = high - (range * 0.618);
+      const fib618Sell = low + (range * 0.618);
+
+      if (candle.close <= fib618Buy * 1.001 && candle.close >= fib618Buy * 0.999 && isBullishTrend) {
+        executeManualTrade('BUY', candle.close, 'Fib: 0.618 Golden Pocket Retracement');
+      } else if (candle.close >= fib618Sell * 0.999 && candle.close <= fib618Sell * 1.001 && !isBullishTrend) {
+        executeManualTrade('SELL', candle.close, 'Fib: 0.618 Golden Pocket Retracement');
+      }
+    } else if (activeStrategy === 'TREND_FOLLOWING') {
+      if (isBullishTrend && candle.delta > 500) {
+        executeManualTrade('BUY', candle.close, 'Trend: Momentum Breakout');
+      } else if (!isBullishTrend && candle.delta < -500) {
+        executeManualTrade('SELL', candle.close, 'Trend: Momentum Breakdown');
+      }
+    } else {
+      // Default: MEAN_REVERSION
+      if (rsi < 35 && isBullishTrend && candle.delta > 0) {
+        executeManualTrade('BUY', candle.close, 'Alpha-Pro: Bullish Reversal');
+      } else if (rsi > 65 && !isBullishTrend && candle.delta < 0) {
+        executeManualTrade('SELL', candle.close, 'Alpha-Pro: Bearish Reversal');
+      }
     }
-  }, [closeTrade, executeManualTrade]);
+  }, [closeTrade, executeManualTrade, activeStrategy, candles]);
 
   useEffect(() => {
     const openTradesPnl = trades.filter(t => t.status === 'OPEN').reduce((acc, t) => {

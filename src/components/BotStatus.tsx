@@ -68,6 +68,7 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
                   <SelectContent className="bg-slate-900 border-slate-800 text-white">
                     <SelectItem value="MEAN_REVERSION">Mean Reversion</SelectItem>
                     <SelectItem value="TREND_FOLLOWING">Trend Following</SelectItem>
+                    <SelectItem value="FIB_RETRACEMENT">Fib Retracement</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
