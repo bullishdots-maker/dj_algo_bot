@@ -34,6 +34,7 @@ import AlertsPanel from '../components/AlertsPanel';
 import Header from '../components/Header';
 import NeuralTrainingMonitor from '../components/NeuralTrainingMonitor';
 import GlobalMacroView from '../components/GlobalMacroView';
+import ManualTradePanel from '../components/ManualTradePanel';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
 import { toast } from "sonner";
@@ -171,7 +172,11 @@ const Index = () => {
               <StrategyCustomizer />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <RiskRewardPanel lotSize={lotSize} currentPrice={currentPrice} />
+              <ManualTradePanel 
+                activeAsset={activeAsset} 
+                currentPrice={currentPrice} 
+                onExecute={executeManualTrade} 
+              />
               <RiskSettings 
                 lotSize={lotSize} 
                 setLotSize={setLotSize} 
@@ -179,7 +184,8 @@ const Index = () => {
                 setRiskLevel={setRiskLevel} 
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <RiskRewardPanel lotSize={lotSize} currentPrice={currentPrice} />
               <PerformanceAnalytics trades={trades} equityHistory={equityHistory} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[450px]">
