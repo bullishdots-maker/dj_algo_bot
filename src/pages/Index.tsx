@@ -26,6 +26,9 @@ import BacktestPanel from '../components/BacktestPanel';
 import SessionMap from '../components/SessionMap';
 import CorrelationMatrix from '../components/CorrelationMatrix';
 import LiquidityHeatmap from '../components/LiquidityHeatmap';
+import PortfolioAllocation from '../components/PortfolioAllocation';
+import NeuralNarrative from '../components/NeuralNarrative';
+import WhaleTracker from '../components/WhaleTracker';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
@@ -151,6 +154,12 @@ const Index = () => {
               <MarketSentiment sentiment={sentiment} />
               <SystemHealth />
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <NeuralNarrative />
+              <PortfolioAllocation />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <CorrelationMatrix />
               <LiquidityHeatmap />
@@ -191,6 +200,9 @@ const Index = () => {
               onSelect={setActiveAsset} 
               currentPrice={currentPrice} 
             />
+            <div className="h-[400px] shadow-2xl">
+              <WhaleTracker />
+            </div>
             <div className="h-[450px] shadow-2xl">
               <MarketDepth activeAsset={activeAsset} currentPrice={currentPrice} />
             </div>
