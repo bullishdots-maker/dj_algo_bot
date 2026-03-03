@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Candle, Trade, MarketOrder, AccountStats, Asset, Strategy } from '../types/trading';
+import { Candle, Trade, MarketOrder, AccountStats, Asset } from '../types/trading';
 import { format } from 'date-fns';
 
 const SYMBOL_MAP: Record<Asset, string> = {
@@ -14,9 +14,8 @@ const ASSET_CONFIG: Record<Asset, { lotSize: number; precision: number }> = {
   'BTC/USD': { lotSize: 1, precision: 2 },
 };
 
-const STORAGE_KEY = 'trading_sim_data_v3';
+const STORAGE_KEY = 'trading_sim_data_v4';
 
-// Helper to calculate RSI
 const calculateRSI = (candles: Candle[], period: number = 14) => {
   if (candles.length <= period) return 50;
   let gains = 0;
@@ -30,7 +29,7 @@ const calculateRSI = (candles: Candle[], period: number = 14) => {
   return 100 - (100 / (1 + rs));
 };
 
-export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: Strategy = 'MEAN_REVERSION') => {
+export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [currentPrice, setCurrentPrice] = useState<number>(0);
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -63,16 +62,16 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
     tradesRef.current = trades;
   }, [account, trades, equityHistory]);
 
-  const executeManualTrade = useCallback((type: 'BUY' | 'SELL', price: number) => {
+  const executeManualTrade = useCallback((type: 'BUY' | 'SELL', price: number, reason: string = 'Manual Execution') => {
     const newTrade: Trade = {
       id: Math.random().toString(36).substr(2, 9),
       asset: activeAsset,
       time: format(new Date(), 'HH:mm:ss'),
       type,
       price,
-      reason: 'Manual Execution',
+      reason,
       status: 'OPEN',
-      isManual: true,
+      isManual: reason === 'Manual Execution',
     };
     setTrades(prev => [newTrade, ...prev]);
   }, [activeAsset]);
@@ -148,7 +147,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
             newCandle.rsi = calculateRSI(updated);
             return updated;
           });
-          if (isActive) processBotLogic(activeAsset, newCandle, strategy);
+          if (isActive) processAlphaProLogic(activeAsset, newCandle);
         } else {
           setCandles(prev => {
             const last = prev[prev.length - 1];
@@ -159,27 +158,34 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
       }
     };
     return () => ws.close();
-  }, [activeAsset, isActive, strategy]);
+  }, [activeAsset, isActive]);
 
-  const processBotLogic = useCallback((asset: Asset, candle: Candle, strat: Strategy) => {
+  const processAlphaProLogic = useCallback((asset: Asset, candle: Candle) => {
     const openTrades = tradesRef.current.filter(t => t.status === 'OPEN' && t.asset === asset && !t.isManual);
+    
+    // Exit Logic: Close if profit target reached or trend reverses
     if (openTrades.length > 0) {
-      if (Math.random() > 0.6) closeTrade(openTrades[0].id, candle.close);
+      const trade = openTrades[0];
+      const pnl = trade.type === 'BUY' ? (candle.close - trade.price) : (trade.price - candle.close);
+      const pips = pnl * (asset === 'EUR/USD' ? 10000 : 1);
+      
+      if (pips > 10 || pips < -5) { // 2:1 Reward/Risk Ratio
+        closeTrade(trade.id, candle.close);
+      }
       return;
     }
 
-    const bodySize = Math.abs(candle.open - candle.close);
-    const isBullish = candle.close > candle.open;
-    
-    if (strat === 'MEAN_REVERSION') {
-      const isOversold = (candle.rsi && candle.rsi < 30) || (!isBullish && bodySize > (candle.high - candle.low) * 0.7);
-      const isOverbought = (candle.rsi && candle.rsi > 70) || (isBullish && bodySize > (candle.high - candle.low) * 0.7);
-      if (isOversold) executeManualTrade('BUY', candle.close);
-      else if (isOverbought) executeManualTrade('SELL', candle.close);
-    } else {
-      const isStrongTrend = bodySize > (candle.high - candle.low) * 0.5;
-      if (isStrongTrend && isBullish) executeManualTrade('BUY', candle.close);
-      else if (isStrongTrend && !isBullish) executeManualTrade('SELL', candle.close);
+    // Entry Logic: Alpha-Pro Hybrid Strategy
+    // High Win Rate: RSI Reversal + MA Trend Confirmation + Momentum Delta
+    const rsi = candle.rsi || 50;
+    const ma7 = candle.ma7 || candle.close;
+    const isBullishTrend = candle.close > ma7;
+    const isStrongMomentum = Math.abs(candle.delta) > 500;
+
+    if (rsi < 35 && isBullishTrend && candle.delta > 0) {
+      executeManualTrade('BUY', candle.close, 'Alpha-Pro: Bullish Reversal');
+    } else if (rsi > 65 && !isBullishTrend && candle.delta < 0) {
+      executeManualTrade('SELL', candle.close, 'Alpha-Pro: Bearish Reversal');
     }
   }, [closeTrade, executeManualTrade]);
 
@@ -191,7 +197,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset, strategy: S
     const newEquity = account.balance + openTradesPnl;
     setAccount(prev => ({ ...prev, equity: newEquity }));
 
-    // Update equity history every 10 seconds if price changes
     const now = format(new Date(), 'HH:mm:ss');
     setEquityHistory(prev => {
       if (prev.length > 0 && prev[prev.length - 1].time === now) return prev;

@@ -14,7 +14,7 @@ import NewsTicker from '../components/NewsTicker';
 import TechnicalAnalysis from '../components/TechnicalAnalysis';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Asset, Strategy } from '../types/trading';
+import { Asset } from '../types/trading';
 import { toast } from "sonner";
 import { Download, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button';
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
   const [activeAsset, setActiveAsset] = useState<Asset>('EUR/USD');
-  const [strategy, setStrategy] = useState<Strategy>('MEAN_REVERSION');
   const [lotSize, setLotSize] = useState(1.0);
   const [riskLevel, setRiskLevel] = useState(50);
   
@@ -36,7 +35,7 @@ const Index = () => {
     equityHistory,
     executeManualTrade, 
     closeTrade 
-  } = useTradingSim(isActive, activeAsset, strategy);
+  } = useTradingSim(isActive, activeAsset);
 
   const openTrades = trades.filter(t => t.status === 'OPEN');
 
@@ -83,8 +82,6 @@ const Index = () => {
               currentPrice={currentPrice}
               activeAsset={activeAsset}
               setActiveAsset={setActiveAsset}
-              strategy={strategy}
-              setStrategy={setStrategy}
             />
           </div>
           <div className="lg:col-span-4">

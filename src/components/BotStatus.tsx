@@ -3,8 +3,8 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Play, Square, Activity, Globe, Coins, Settings2 } from 'lucide-react';
-import { Asset, Strategy } from '../types/trading';
+import { Play, Square, Activity, Globe, ShieldCheck } from 'lucide-react';
+import { Asset } from '../types/trading';
 import { 
   Select,
   SelectContent,
@@ -19,11 +19,9 @@ interface BotStatusProps {
   currentPrice: number;
   activeAsset: Asset;
   setActiveAsset: (asset: Asset) => void;
-  strategy: Strategy;
-  setStrategy: (strat: Strategy) => void;
 }
 
-const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset, strategy, setStrategy }: BotStatusProps) => {
+const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset }: BotStatusProps) => {
   const formatPrice = (price: number) => {
     if (activeAsset === 'EUR/USD') return price.toFixed(5);
     if (activeAsset === 'BTC/USD') return price.toLocaleString(undefined, { minimumFractionDigits: 2 });
@@ -53,17 +51,11 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1">
-              <Label className="text-[10px] uppercase text-slate-500 font-bold">Strategy</Label>
-              <Select value={strategy} onValueChange={(val) => setStrategy(val as Strategy)}>
-                <SelectTrigger className="w-[180px] bg-slate-900 border-slate-800 text-white h-8">
-                  <SelectValue placeholder="Select Strategy" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-800 text-white">
-                  <SelectItem value="MEAN_REVERSION">Mean Reversion</SelectItem>
-                  <SelectItem value="TREND_FOLLOWING">Trend Following</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex flex-col justify-center px-4 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <span className="text-[10px] uppercase text-blue-400 font-bold">Active Strategy</span>
+              <span className="text-xs font-bold text-white flex items-center gap-1">
+                <ShieldCheck size={12} className="text-blue-400" /> Alpha-Pro Hybrid
+              </span>
             </div>
           </div>
           <div className="text-right">
