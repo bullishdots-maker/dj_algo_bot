@@ -12,10 +12,11 @@ import EconomicCalendar from '../components/EconomicCalendar';
 import ManualControls from '../components/ManualControls';
 import NewsTicker from '../components/NewsTicker';
 import TechnicalAnalysis from '../components/TechnicalAnalysis';
+import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset, Strategy } from '../types/trading';
 import { toast } from "sonner";
-import { Download } from 'lucide-react';
+import { Download, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -60,6 +61,8 @@ const Index = () => {
       <NewsTicker />
       
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+        <Header />
+
         <div className="flex justify-between items-end">
           <AccountOverview account={account} />
           <Button 
@@ -129,8 +132,9 @@ const Index = () => {
         </div>
 
         <footer className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-xs text-slate-500">
-            © 2024 AlgoForex Systems. For simulation purposes only.
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <User size={12} />
+            <span>© 2024 AlgoBot Pro. Developed by <span className="text-slate-300 font-bold">DJ trades</span>.</span>
           </div>
           <MadeWithDyad />
         </footer>
