@@ -9,7 +9,6 @@ import RiskSettings from '../components/RiskSettings';
 import PerformanceAnalytics from '../components/PerformanceAnalytics';
 import MarketSentiment from '../components/MarketSentiment';
 import EconomicCalendar from '../components/EconomicCalendar';
-import ManualControls from '../components/ManualControls';
 import NewsTicker from '../components/NewsTicker';
 import TechnicalAnalysis from '../components/TechnicalAnalysis';
 import RiskRewardPanel from '../components/RiskRewardPanel';
@@ -93,21 +92,13 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-12">
             <BotStatus 
               isActive={isActive} 
               setIsActive={setIsActive} 
               currentPrice={currentPrice}
               activeAsset={activeAsset}
               setActiveAsset={setActiveAsset}
-            />
-          </div>
-          <div className="lg:col-span-4">
-            <ManualControls 
-              onBuy={() => executeManualTrade('BUY', currentPrice)}
-              onSell={() => executeManualTrade('SELL', currentPrice)}
-              onCloseAll={() => openTrades.forEach(t => closeTrade(t.id, currentPrice))}
-              openTradesCount={openTrades.length}
             />
           </div>
         </div>
