@@ -1,4 +1,5 @@
 export type Asset = 'EUR/USD' | 'XAU/USD' | 'BTC/USD';
+export type Strategy = 'MEAN_REVERSION' | 'TREND_FOLLOWING';
 
 export interface Candle {
   time: string;
@@ -8,6 +9,8 @@ export interface Candle {
   close: number;
   volume: number;
   delta: number;
+  ma7?: number;
+  rsi?: number;
 }
 
 export interface Trade {
@@ -20,6 +23,7 @@ export interface Trade {
   status: 'OPEN' | 'CLOSED';
   pnl?: number;
   exitPrice?: number;
+  isManual?: boolean;
 }
 
 export interface MarketOrder {

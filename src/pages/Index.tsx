@@ -9,32 +9,66 @@ import RiskSettings from '../components/RiskSettings';
 import PerformanceAnalytics from '../components/PerformanceAnalytics';
 import MarketSentiment from '../components/MarketSentiment';
 import EconomicCalendar from '../components/EconomicCalendar';
+import ManualControls from '../components/ManualControls';
+import NewsTicker from '../components/NewsTicker';
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Asset } from '../types/trading';
+import { Asset, Strategy } from '../types/trading';
 import { toast } from "sonner";
+import { Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
   const [activeAsset, setActiveAsset] = useState<Asset>('EUR/USD');
+  const [strategy, setStrategy] = useState<Strategy>('MEAN_REVERSION');
   const [lotSize, setLotSize] = useState(1.0);
   const [riskLevel, setRiskLevel] = useState(50);
   
-  const { candles, trades, orders, currentPrice, account, sentiment } = useTradingSim(isActive, activeAsset);
+  const { 
+    candles, 
+    trades, 
+    orders, 
+    currentPrice, 
+    account, 
+    sentiment, 
+    executeManualTrade, 
+    closeTrade 
+  } = useTradingSim(isActive, activeAsset, strategy);
 
-  useEffect(() => {
-    if (trades.length > 0 && trades[0].status === 'OPEN') {
-      const latestTrade = trades[0];
-      toast.info(`New ${latestTrade.type} Order`, {
-        description: `${latestTrade.asset} executed at ${latestTrade.price.toFixed(activeAsset === 'EUR/USD' ? 5 : 2)}`,
-        duration: 3000,
-      });
-    }
-  }, [trades.length]);
+  const openTrades = trades.filter(t => t.status === 'OPEN');
+
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Asset', 'Time', 'Type', 'Price', 'Status', 'PnL', 'Reason'];
+    const rows = trades.map(t => [
+      t.id, t.asset, t.time, t.type, t.price, t.status, t.pnl || 0, t.reason
+    ]);
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `trade_history_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Trade history exported successfully");
+  };
 
   return (
-    <div className="min-h-screen bg-black text-slate-200 p-4 md:p-8 font-sans selection:bg-blue-500/30">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <AccountOverview account={account} />
+    <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-blue-500/30">
+      <NewsTicker />
+      
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+        <div className="flex justify-between items-end">
+          <AccountOverview account={account} />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleExportCSV}
+            className="border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
+          >
+            <Download className="mr-2 h-4 w-4" /> Export History
+          </Button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
@@ -44,25 +78,17 @@ const Index = () => {
               currentPrice={currentPrice}
               activeAsset={activeAsset}
               setActiveAsset={setActiveAsset}
+              strategy={strategy}
+              setStrategy={setStrategy}
             />
           </div>
           <div className="lg:col-span-4">
-            <div className="h-full p-6 rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/20 flex flex-col justify-center">
-              <h4 className="text-blue-400 font-bold uppercase tracking-widest text-[10px] mb-2">System Health</h4>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-sm font-medium">Engine Online</span>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-[10px] uppercase font-bold">
-                  <span className="text-slate-400">Latency</span>
-                  <span className="text-slate-200">14ms</span>
-                </div>
-                <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
-                  <div className="bg-blue-500 h-full w-[85%]" />
-                </div>
-              </div>
-            </div>
+            <ManualControls 
+              onBuy={() => executeManualTrade('BUY', currentPrice)}
+              onSell={() => executeManualTrade('SELL', currentPrice)}
+              onCloseAll={() => openTrades.forEach(t => closeTrade(t.id, currentPrice))}
+              openTradesCount={openTrades.length}
+            />
           </div>
         </div>
 

@@ -3,8 +3,8 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Play, Square, Activity, Globe, Coins } from 'lucide-react';
-import { Asset } from '../types/trading';
+import { Play, Square, Activity, Globe, Coins, Settings2 } from 'lucide-react';
+import { Asset, Strategy } from '../types/trading';
 import { 
   Select,
   SelectContent,
@@ -19,9 +19,11 @@ interface BotStatusProps {
   currentPrice: number;
   activeAsset: Asset;
   setActiveAsset: (asset: Asset) => void;
+  strategy: Strategy;
+  setStrategy: (strat: Strategy) => void;
 }
 
-const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset }: BotStatusProps) => {
+const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset, strategy, setStrategy }: BotStatusProps) => {
   const formatPrice = (price: number) => {
     if (activeAsset === 'EUR/USD') return price.toFixed(5);
     if (activeAsset === 'BTC/USD') return price.toLocaleString(undefined, { minimumFractionDigits: 2 });
@@ -51,6 +53,18 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-slate-500 font-bold">Strategy</Label>
+              <Select value={strategy} onValueChange={(val) => setStrategy(val as Strategy)}>
+                <SelectTrigger className="w-[180px] bg-slate-900 border-slate-800 text-white h-8">
+                  <SelectValue placeholder="Select Strategy" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                  <SelectItem value="MEAN_REVERSION">Mean Reversion</SelectItem>
+                  <SelectItem value="TREND_FOLLOWING">Trend Following</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="text-right">
             <div className="text-3xl font-mono font-bold text-blue-400">
@@ -63,25 +77,6 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-lg bg-slate-900 border border-slate-800">
-            <div className="flex items-center gap-2 text-slate-400 mb-1">
-              <Activity size={16} />
-              <span className="text-xs font-semibold uppercase">Data Stream</span>
-            </div>
-            <div className="text-sm text-slate-200">WebSocket @ 100ms Ticks</div>
-          </div>
-          <div className="p-4 rounded-lg bg-slate-900 border border-slate-800">
-            <div className="flex items-center gap-2 text-slate-400 mb-1">
-              <Coins size={16} />
-              <span className="text-xs font-semibold uppercase">Asset Class</span>
-            </div>
-            <div className="text-sm text-slate-200">
-              {activeAsset === 'BTC/USD' ? 'Digital Asset' : activeAsset === 'XAU/USD' ? 'Commodity' : 'Fiat Currency'}
-            </div>
-          </div>
-        </div>
-
         <div className="flex items-center justify-between p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
           <div className="flex items-center gap-3">
             <Switch 
@@ -89,7 +84,7 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
               onCheckedChange={setIsActive}
               className="data-[state=checked]:bg-emerald-500"
             />
-            <Label className="text-slate-200">Live Execution Mode</Label>
+            <Label className="text-slate-200">Auto-Execution Mode</Label>
           </div>
           <Button 
             variant={isActive ? "destructive" : "default"}
