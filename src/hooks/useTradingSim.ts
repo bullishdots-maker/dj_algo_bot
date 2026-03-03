@@ -52,6 +52,16 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
     { time: format(addMinutes(new Date(), 30), 'HH:mm'), currency: 'USD', event: 'Core CPI m/m', impact: 'HIGH', forecast: '0.3%', actual: '-' },
     { time: format(addMinutes(new Date(), 120), 'HH:mm'), currency: 'EUR', event: 'ECB President Speaks', impact: 'HIGH', forecast: '-', actual: '-' }
   ]);
+  const [quantChat, setQuantChat] = useState<any[]>([
+    { user: 'Alpha_Whale', msg: 'BTC looking heavy at 65k. Watching for sweep.', time: '2m ago', type: 'BEAR' },
+    { user: 'Quant_Bot_9', msg: 'Order flow imbalance detected on ETH. Long bias.', time: '5m ago', type: 'BULL' }
+  ]);
+  const [neuralWeights, setNeuralWeights] = useState({
+    rsi: 0.5,
+    trend: 0.5,
+    volume: 0.5,
+    sentiment: 0.5
+  });
 
   const [account, setAccount] = useState<AccountStats>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -100,7 +110,28 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
         ];
         setGeoEvents(prev => [geoPool[Math.floor(Math.random() * geoPool.length)], ...prev].slice(0, 5));
       }
-    }, 15000);
+
+      // Quant Chat Simulation
+      if (Math.random() > 0.6) {
+        const chatPool = [
+          { user: 'Macro_King', msg: 'Yield curve inversion deepening. Risk off.', type: 'BEAR' },
+          { user: 'Satoshi_Disciple', msg: 'HODL mode engaged. Supply shock incoming.', type: 'BULL' },
+          { user: 'Grid_Trader', msg: 'Range bound for now. Scalping the edges.', type: 'NEUTRAL' },
+          { user: 'Liquidity_Hunter', msg: 'Stop hunt at previous daily high. Watch out.', type: 'BEAR' }
+        ];
+        const msg = chatPool[Math.floor(Math.random() * chatPool.length)];
+        setQuantChat(prev => [{ ...msg, time: 'Just now' }, ...prev].slice(0, 10));
+      }
+
+      // Neural Weights Simulation
+      setNeuralWeights({
+        rsi: Math.random(),
+        trend: Math.random(),
+        volume: Math.random(),
+        sentiment: Math.random()
+      });
+
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -156,7 +187,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
       const data = JSON.parse(event.data);
       if (data.e === '24hrTicker') {
         setCurrentPrice(parseFloat(data.c));
-        if (Math.random() > 0.5) { // Increased frequency for dynamic feel
+        if (Math.random() > 0.5) {
           const newOrder: MarketOrder = {
             id: Math.random().toString(36).substr(2, 9),
             asset: activeAsset,
@@ -168,7 +199,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
           };
           setOrders(prev => [newOrder, ...prev].slice(0, 50));
           
-          // Update sentiment based on orders
           setSentiment(prev => {
             const buyWeight = newOrder.side === 'BUY' ? 1 : -1;
             const next = prev + (buyWeight * 0.5);
@@ -254,6 +284,6 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
 
   return { 
     candles, trades, orders, currentPrice, account, sentiment, equityHistory, 
-    news, geoEvents, ecoEvents, executeManualTrade, closeTrade 
+    news, geoEvents, ecoEvents, quantChat, neuralWeights, executeManualTrade, closeTrade 
   };
 };

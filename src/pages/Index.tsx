@@ -18,6 +18,8 @@ import GeoPoliticalPanel from '../components/GeoPoliticalPanel';
 import MarketDepth from '../components/MarketDepth';
 import SystemLogs from '../components/SystemLogs';
 import TradingViewChart from '../components/TradingViewChart';
+import NeuralMatrix from '../components/NeuralMatrix';
+import QuantChat from '../components/QuantChat';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
@@ -34,7 +36,7 @@ const Index = () => {
   
   const { 
     candles, trades, orders, currentPrice, account, sentiment, equityHistory,
-    news, geoEvents, ecoEvents, executeManualTrade, closeTrade 
+    news, geoEvents, ecoEvents, quantChat, neuralWeights, executeManualTrade, closeTrade 
   } = useTradingSim(isActive, activeAsset);
 
   const openTrades = trades.filter(t => t.status === 'OPEN');
@@ -139,12 +141,16 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <TechnicalAnalysis candles={candles} />
+              <NeuralMatrix weights={neuralWeights} />
               <MarketSentiment sentiment={sentiment} />
               <EconomicCalendar events={ecoEvents} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <GeoPoliticalPanel events={geoEvents} />
+              <QuantChat messages={quantChat} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TechnicalAnalysis candles={candles} />
               <MT5Connector />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
