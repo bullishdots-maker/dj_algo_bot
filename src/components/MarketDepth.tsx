@@ -45,7 +45,7 @@ const MarketDepth = ({ activeAsset, currentPrice }: MarketDepthProps) => {
         {/* Asks (Sells) */}
         <div className="space-y-0.5 mb-2">
           {asks.map((level, i) => (
-            <div key={`ask-${i}`} className="relative h-5 flex items-center justify-between px-2 group">
+            <div key={`ask-${i}`} className="relative h-5 flex items-center justify-between px-2 group cursor-pointer hover:bg-rose-500/5">
               <div 
                 className="absolute right-0 top-0 h-full bg-rose-500/10 transition-all duration-300" 
                 style={{ width: `${(level.total / maxTotal) * 100}%` }}
@@ -65,7 +65,7 @@ const MarketDepth = ({ activeAsset, currentPrice }: MarketDepthProps) => {
         {/* Bids (Buys) */}
         <div className="space-y-0.5 mt-2">
           {bids.map((level, i) => (
-            <div key={`bid-${i}`} className="relative h-5 flex items-center justify-between px-2 group">
+            <div key={`bid-${i}`} className="relative h-5 flex items-center justify-between px-2 group cursor-pointer hover:bg-emerald-500/5">
               <div 
                 className="absolute right-0 top-0 h-full bg-emerald-500/10 transition-all duration-300" 
                 style={{ width: `${(level.total / maxTotal) * 100}%` }}

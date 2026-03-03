@@ -3,8 +3,8 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Play, Square, Globe, ShieldCheck, Cpu } from 'lucide-react';
-import { Asset } from '../types/trading';
+import { Play, Square, Globe, ShieldCheck, Cpu, Zap } from 'lucide-react';
+import { Asset, Strategy } from '../types/trading';
 import { 
   Select,
   SelectContent,
@@ -22,6 +22,8 @@ interface BotStatusProps {
 }
 
 const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset }: BotStatusProps) => {
+  const [strategy, setStrategy] = React.useState<Strategy>('MEAN_REVERSION');
+
   const formatPrice = (price: number) => {
     if (activeAsset === 'XAG/USD') return price.toFixed(3);
     if (activeAsset === 'XAU/USD') return price.toFixed(2);
@@ -42,19 +44,33 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
               <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">v4.2 Neural Engine</p>
             </div>
             <div className="h-12 w-[1px] bg-slate-800 mx-2" />
-            <div className="space-y-1">
-              <Label className="text-[10px] uppercase text-slate-500 font-bold tracking-tighter">Asset Selection</Label>
-              <Select value={activeAsset} onValueChange={(val) => setActiveAsset(val as Asset)}>
-                <SelectTrigger className="w-[180px] bg-slate-900 border-slate-800 text-white h-9 font-bold">
-                  <SelectValue placeholder="Select Asset" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-800 text-white">
-                  <SelectItem value="BTC/USD">Bitcoin (BTC/USD)</SelectItem>
-                  <SelectItem value="ETH/USD">Ethereum (ETH/USD)</SelectItem>
-                  <SelectItem value="XAU/USD">Gold (XAU/USD)</SelectItem>
-                  <SelectItem value="XAG/USD">Silver (XAG/USD)</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex gap-4">
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase text-slate-500 font-bold tracking-tighter">Asset</Label>
+                <Select value={activeAsset} onValueChange={(val) => setActiveAsset(val as Asset)}>
+                  <SelectTrigger className="w-[140px] bg-slate-900 border-slate-800 text-white h-9 font-bold">
+                    <SelectValue placeholder="Asset" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                    <SelectItem value="BTC/USD">BTC/USD</SelectItem>
+                    <SelectItem value="ETH/USD">ETH/USD</SelectItem>
+                    <SelectItem value="XAU/USD">XAU/USD</SelectItem>
+                    <SelectItem value="XAG/USD">XAG/USD</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase text-slate-500 font-bold tracking-tighter">Strategy</Label>
+                <Select value={strategy} onValueChange={(val) => setStrategy(val as Strategy)}>
+                  <SelectTrigger className="w-[160px] bg-slate-900 border-slate-800 text-white h-9 font-bold">
+                    <SelectValue placeholder="Strategy" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                    <SelectItem value="MEAN_REVERSION">Mean Reversion</SelectItem>
+                    <SelectItem value="TREND_FOLLOWING">Trend Following</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <div className="text-right">
