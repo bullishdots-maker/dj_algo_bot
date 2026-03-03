@@ -15,6 +15,8 @@ import TechnicalAnalysis from '../components/TechnicalAnalysis';
 import RiskRewardPanel from '../components/RiskRewardPanel';
 import MT5Connector from '../components/MT5Connector';
 import GeoPoliticalPanel from '../components/GeoPoliticalPanel';
+import MarketDepth from '../components/MarketDepth';
+import SystemLogs from '../components/SystemLogs';
 import Header from '../components/Header';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
@@ -126,13 +128,17 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
               <PerformanceAnalytics trades={trades} equityHistory={equityHistory} />
             </div>
-            <div className="h-[400px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[400px]">
               <TradeLog trades={trades} />
+              <SystemLogs isActive={isActive} />
             </div>
           </div>
 
-          <div className="lg:col-span-4 h-full">
-            <div className="sticky top-6 h-[calc(100vh-100px)]">
+          <div className="lg:col-span-4 space-y-6">
+            <div className="h-[400px]">
+              <MarketDepth activeAsset={activeAsset} currentPrice={currentPrice} />
+            </div>
+            <div className="h-[calc(100vh-600px)] min-h-[400px]">
               <OrderFlowTape orders={orders} activeAsset={activeAsset} />
             </div>
           </div>
