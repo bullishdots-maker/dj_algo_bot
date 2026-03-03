@@ -3,7 +3,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Play, Square, Activity, ShieldCheck, Coins } from 'lucide-react';
+import { Play, Square, Activity, Globe, Coins } from 'lucide-react';
 import { Asset } from '../types/trading';
 import { 
   Select,
@@ -23,7 +23,9 @@ interface BotStatusProps {
 
 const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset }: BotStatusProps) => {
   const formatPrice = (price: number) => {
-    return activeAsset === 'EUR/USD' ? price.toFixed(5) : price.toFixed(2);
+    if (activeAsset === 'EUR/USD') return price.toFixed(5);
+    if (activeAsset === 'BTC/USD') return price.toLocaleString(undefined, { minimumFractionDigits: 2 });
+    return price.toFixed(2);
   };
 
   return (
@@ -32,20 +34,20 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white">AlgoBot v1.0</h2>
-              <p className="text-slate-400 text-sm">Multi-Asset Execution Engine</p>
+              <h2 className="text-2xl font-bold text-white">AlgoBot Live</h2>
+              <p className="text-slate-400 text-sm">Real-Time WebSocket Engine</p>
             </div>
             <div className="h-10 w-[1px] bg-slate-800 mx-2" />
             <div className="space-y-1">
-              <Label className="text-[10px] uppercase text-slate-500 font-bold">Active Market</Label>
+              <Label className="text-[10px] uppercase text-slate-500 font-bold">Live Feed</Label>
               <Select value={activeAsset} onValueChange={(val) => setActiveAsset(val as Asset)}>
-                <SelectTrigger className="w-[140px] bg-slate-900 border-slate-800 text-white h-8">
+                <SelectTrigger className="w-[160px] bg-slate-900 border-slate-800 text-white h-8">
                   <SelectValue placeholder="Select Asset" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-900 border-slate-800 text-white">
-                  <SelectItem value="EUR/USD">EUR/USD</SelectItem>
+                  <SelectItem value="EUR/USD">EUR/USD (Forex)</SelectItem>
                   <SelectItem value="XAU/USD">XAU/USD (Gold)</SelectItem>
-                  <SelectItem value="XAG/USD">XAG/USD (Silver)</SelectItem>
+                  <SelectItem value="BTC/USD">BTC/USD (Crypto)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -54,7 +56,10 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
             <div className="text-3xl font-mono font-bold text-blue-400">
               {formatPrice(currentPrice)}
             </div>
-            <div className="text-xs text-slate-500 uppercase tracking-wider">Live {activeAsset}</div>
+            <div className="flex items-center justify-end gap-1.5 text-xs text-slate-500 uppercase tracking-wider">
+              <Globe size={12} className="text-emerald-500" />
+              Binance Live
+            </div>
           </div>
         </div>
 
@@ -62,9 +67,9 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
           <div className="p-4 rounded-lg bg-slate-900 border border-slate-800">
             <div className="flex items-center gap-2 text-slate-400 mb-1">
               <Activity size={16} />
-              <span className="text-xs font-semibold uppercase">Strategy</span>
+              <span className="text-xs font-semibold uppercase">Data Stream</span>
             </div>
-            <div className="text-sm text-slate-200">Price Action + Order Flow</div>
+            <div className="text-sm text-slate-200">WebSocket @ 100ms Ticks</div>
           </div>
           <div className="p-4 rounded-lg bg-slate-900 border border-slate-800">
             <div className="flex items-center gap-2 text-slate-400 mb-1">
@@ -72,7 +77,7 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
               <span className="text-xs font-semibold uppercase">Asset Class</span>
             </div>
             <div className="text-sm text-slate-200">
-              {activeAsset.startsWith('XA') ? 'Precious Metals' : 'Forex Major'}
+              {activeAsset === 'BTC/USD' ? 'Digital Asset' : activeAsset === 'XAU/USD' ? 'Commodity' : 'Fiat Currency'}
             </div>
           </div>
         </div>
@@ -84,7 +89,7 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
               onCheckedChange={setIsActive}
               className="data-[state=checked]:bg-emerald-500"
             />
-            <Label className="text-slate-200">Auto-Trading System</Label>
+            <Label className="text-slate-200">Live Execution Mode</Label>
           </div>
           <Button 
             variant={isActive ? "destructive" : "default"}

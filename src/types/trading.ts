@@ -1,4 +1,4 @@
-export type Asset = 'EUR/USD' | 'XAU/USD' | 'XAG/USD';
+export type Asset = 'EUR/USD' | 'XAU/USD' | 'BTC/USD';
 
 export interface Candle {
   time: string;
