@@ -1,30 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { Play, BarChart3, TrendingUp, ShieldAlert, Zap } from 'lucide-react';
+import { Progress } from './ui/progress';
+import { Play, BarChart3, TrendingUp, ShieldAlert, Zap, Loader2 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 import { toast } from 'sonner';
 
 const BacktestPanel = () => {
   const [isSimulating, setIsSimulating] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<any[]>([]);
+  const [stats, setStats] = useState({ profit: 0, sharpe: 0, drawdown: 0 });
 
   const runBacktest = () => {
     setIsSimulating(true);
+    setProgress(0);
     setResults([]);
     
-    // Simulate backtest calculation delay
-    setTimeout(() => {
-      const mockData = [];
-      let equity = 10000;
-      for (let i = 0; i < 50; i++) {
-        equity += (Math.random() - 0.45) * 500;
-        mockData.push({ day: i, equity });
+    const duration = 3000; // 3 seconds simulation
+    const interval = 50;
+    const steps = duration / interval;
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep++;
+      const p = (currentStep / steps) * 100;
+      setProgress(p);
+
+      if (currentStep >= steps) {
+        clearInterval(timer);
+        generateResults();
       }
-      setResults(mockData);
-      setIsSimulating(false);
-      toast.success("Backtest completed: 14.2% Return over 30 days");
-    }, 2000);
+    }, interval);
+  };
+
+  const generateResults = () => {
+    const mockData = [];
+    let equity = 10000;
+    const winRate = 0.55 + (Math.random() * 0.1);
+    
+    for (let i = 0; i < 60; i++) {
+      const change = (Math.random() < winRate ? 1 : -1) * (Math.random() * 400);
+      equity += change;
+      mockData.push({ day: i, equity });
+    }
+
+    const finalProfit = equity - 10000;
+    setStats({
+      profit: finalProfit,
+      sharpe: (1.5 + Math.random()).toFixed(2) as any,
+      drawdown: (3 + Math.random() * 5).toFixed(1) as any
+    });
+    
+    setResults(mockData);
+    setIsSimulating(false);
+    toast.success(`Backtest Complete: $${finalProfit.toFixed(2)} Net Profit`);
   };
 
   return (
@@ -40,12 +70,24 @@ const BacktestPanel = () => {
           disabled={isSimulating}
           className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-8 text-[10px] uppercase"
         >
-          {isSimulating ? "Simulating..." : "Run Simulation"}
+          {isSimulating ? (
+            <><Loader2 className="mr-2 h-3 w-3 animate-spin" /> Simulating...</>
+          ) : "Run Simulation"}
         </Button>
       </div>
 
-      {results.length > 0 ? (
-        <div className="space-y-6">
+      {isSimulating ? (
+        <div className="h-44 flex flex-col items-center justify-center space-y-4">
+          <div className="text-[10px] font-black text-amber-500 uppercase tracking-widest animate-pulse">
+            Processing Historical Data...
+          </div>
+          <Progress value={progress} className="w-full h-1 bg-slate-900" />
+          <div className="text-[9px] text-slate-500 font-mono">
+            Analyzing {Math.floor(progress * 14.4)} market hours...
+          </div>
+        </div>
+      ) : results.length > 0 ? (
+        <div className="space-y-6 animate-in fade-in duration-500">
           <div className="h-32 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={results}>
@@ -76,15 +118,17 @@ const BacktestPanel = () => {
           <div className="grid grid-cols-3 gap-2">
             <div className="p-2 rounded bg-slate-900 border border-slate-800 text-center">
               <span className="text-[8px] text-slate-500 uppercase font-bold block">Net Profit</span>
-              <span className="text-xs font-mono font-bold text-emerald-400">+$1,420</span>
+              <span className={stats.profit >= 0 ? "text-xs font-mono font-bold text-emerald-400" : "text-xs font-mono font-bold text-rose-400"}>
+                {stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(0)}
+              </span>
             </div>
             <div className="p-2 rounded bg-slate-900 border border-slate-800 text-center">
               <span className="text-[8px] text-slate-500 uppercase font-bold block">Sharpe</span>
-              <span className="text-xs font-mono font-bold text-blue-400">2.14</span>
+              <span className="text-xs font-mono font-bold text-blue-400">{stats.sharpe}</span>
             </div>
             <div className="p-2 rounded bg-slate-900 border border-slate-800 text-center">
               <span className="text-[8px] text-slate-500 uppercase font-bold block">Max DD</span>
-              <span className="text-xs font-mono font-bold text-rose-400">4.2%</span>
+              <span className="text-xs font-mono font-bold text-rose-400">{stats.drawdown}%</span>
             </div>
           </div>
         </div>

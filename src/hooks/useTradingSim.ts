@@ -16,7 +16,7 @@ const ASSET_CONFIG: Record<Asset, { lotSize: number; precision: number; pipValue
   'ETH/USD': { lotSize: 10, precision: 2, pipValue: 1 },
 };
 
-const STORAGE_KEY = 'trading_sim_data_v5';
+const STORAGE_KEY = 'trading_sim_data_v6';
 
 const calculateRSI = (candles: Candle[], period: number = 14) => {
   if (candles.length <= period) return 50;
@@ -89,7 +89,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
     tradesRef.current = trades;
   }, [account, trades, equityHistory]);
 
-  // Dynamic News & Events Simulation
+  // Dynamic News & Events Simulation - Increased frequency
   useEffect(() => {
     const interval = setInterval(() => {
       const newsPool = [
@@ -98,32 +98,36 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
         "OIL PRICES STABILIZE AFTER OPEC+ MEETING",
         "JAPANESE YEN WEAKENS AGAINST MAJOR CURRENCIES",
         "SEC REVIEWS NEW CRYPTO ETF APPLICATIONS",
-        "GOLD HITS NEW ALL-TIME HIGH AMID INFLATION FEARS"
+        "GOLD HITS NEW ALL-TIME HIGH AMID INFLATION FEARS",
+        "NASDAQ FUTURES JUMP ON POSITIVE EARNINGS GUIDANCE",
+        "CHINA STIMULUS PACKAGE BOOSTS ASIAN MARKETS"
       ];
       setNews(prev => [newsPool[Math.floor(Math.random() * newsPool.length)], ...prev].slice(0, 10));
 
-      if (Math.random() > 0.7) {
+      if (Math.random() > 0.5) {
         const geoPool = [
           { type: 'CONFLICT', title: 'Border Dispute', desc: 'New tensions reported in Eastern Europe.', impact: 'HIGH', time: 'Just now' },
           { type: 'SOCIAL', title: 'Elon Musk Tweet', desc: '"Doge to the moon? Maybe not today."', impact: 'MED', time: '1m ago' },
-          { type: 'EVENT', title: 'G7 Emergency', desc: 'Leaders discuss global trade sanctions.', impact: 'CRITICAL', time: '2m ago' }
+          { type: 'EVENT', title: 'G7 Emergency', desc: 'Leaders discuss global trade sanctions.', impact: 'CRITICAL', time: '2m ago' },
+          { type: 'SOCIAL', title: 'Whale Alert', desc: 'Dormant wallet from 2011 just moved 5,000 BTC.', impact: 'HIGH', time: 'Just now' }
         ];
         setGeoEvents(prev => [geoPool[Math.floor(Math.random() * geoPool.length)], ...prev].slice(0, 5));
       }
 
-      // Quant Chat Simulation
-      if (Math.random() > 0.6) {
+      // Quant Chat Simulation - More frequent
+      if (Math.random() > 0.4) {
         const chatPool = [
           { user: 'Macro_King', msg: 'Yield curve inversion deepening. Risk off.', type: 'BEAR' },
           { user: 'Satoshi_Disciple', msg: 'HODL mode engaged. Supply shock incoming.', type: 'BULL' },
           { user: 'Grid_Trader', msg: 'Range bound for now. Scalping the edges.', type: 'NEUTRAL' },
-          { user: 'Liquidity_Hunter', msg: 'Stop hunt at previous daily high. Watch out.', type: 'BEAR' }
+          { user: 'Liquidity_Hunter', msg: 'Stop hunt at previous daily high. Watch out.', type: 'BEAR' },
+          { user: 'Alpha_Seeker', msg: 'Volume profile showing heavy absorption at current levels.', type: 'BULL' }
         ];
         const msg = chatPool[Math.floor(Math.random() * chatPool.length)];
         setQuantChat(prev => [{ ...msg, time: 'Just now' }, ...prev].slice(0, 10));
       }
 
-      // Neural Weights Simulation
+      // Neural Weights Simulation - Constant jitter
       setNeuralWeights({
         rsi: Math.random(),
         trend: Math.random(),
@@ -131,7 +135,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
         sentiment: Math.random()
       });
 
-    }, 10000);
+    }, 5000); // Faster updates
     return () => clearInterval(interval);
   }, []);
 
@@ -187,7 +191,9 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
       const data = JSON.parse(event.data);
       if (data.e === '24hrTicker') {
         setCurrentPrice(parseFloat(data.c));
-        if (Math.random() > 0.5) {
+        
+        // More frequent order flow simulation
+        if (Math.random() > 0.3) {
           const newOrder: MarketOrder = {
             id: Math.random().toString(36).substr(2, 9),
             asset: activeAsset,
@@ -195,14 +201,14 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
             price: parseFloat(data.c),
             size: Number((Math.random() * (activeAsset === 'BTC/USD' ? 0.5 : 10)).toFixed(2)),
             side: Math.random() > 0.5 ? 'BUY' : 'SELL',
-            imbalance: Math.random() > 0.9,
+            imbalance: Math.random() > 0.85,
           };
           setOrders(prev => [newOrder, ...prev].slice(0, 50));
           
           setSentiment(prev => {
             const buyWeight = newOrder.side === 'BUY' ? 1 : -1;
-            const next = prev + (buyWeight * 0.5);
-            return Math.min(Math.max(next, 20), 80);
+            const next = prev + (buyWeight * 0.8);
+            return Math.min(Math.max(next, 15), 85);
           });
         }
       }
@@ -250,7 +256,8 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
       const pnl = trade.type === 'BUY' ? (candle.close - trade.price) : (trade.price - candle.close);
       const pips = pnl / ASSET_CONFIG[asset].pipValue;
       
-      if (pips > 20 || pips < -10) { 
+      // Dynamic exit logic
+      if (pips > 15 || pips < -8) { 
         closeTrade(trade.id, candle.close);
       }
       return;
@@ -260,9 +267,10 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
     const ma7 = candle.ma7 || candle.close;
     const isBullishTrend = candle.close > ma7;
 
-    if (rsi < 30 && isBullishTrend && candle.delta > 0) {
+    // More sensitive entry logic for simulation
+    if (rsi < 35 && isBullishTrend && candle.delta > 0) {
       executeManualTrade('BUY', candle.close, 'Alpha-Pro: Bullish Reversal');
-    } else if (rsi > 70 && !isBullishTrend && candle.delta < 0) {
+    } else if (rsi > 65 && !isBullishTrend && candle.delta < 0) {
       executeManualTrade('SELL', candle.close, 'Alpha-Pro: Bearish Reversal');
     }
   }, [closeTrade, executeManualTrade]);
