@@ -10,7 +10,7 @@ interface OrderFlowTapeProps {
 }
 
 const OrderFlowTape = ({ orders, activeAsset }: OrderFlowTapeProps) => {
-  const precision = activeAsset === 'EUR/USD' ? 5 : 2;
+  const precision = activeAsset === 'XAG/USD' ? 3 : 2;
 
   return (
     <Card className="bg-slate-950 border-slate-800 flex flex-col h-full">

@@ -23,7 +23,7 @@ interface PriceChartProps {
 }
 
 const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps) => {
-  const precision = activeAsset === 'EUR/USD' ? 4 : 2;
+  const precision = activeAsset === 'XAG/USD' ? 3 : 2;
 
   const tradeMarkers = trades
     .filter(t => t.asset === activeAsset)
@@ -80,7 +80,7 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
             contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '8px' }}
             itemStyle={{ color: '#f1f5f9', fontSize: '12px' }}
             labelStyle={{ color: '#94a3b8', fontSize: '10px', marginBottom: '4px' }}
-            formatter={(value: number) => [value.toFixed(precision + 1), 'Price']}
+            formatter={(value: number) => [value.toFixed(precision), 'Price']}
           />
           
           <Bar dataKey="delta" yAxisId={0} opacity={0.1}>
@@ -115,7 +115,7 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
             strokeDasharray="3 3" 
             label={{ 
               position: 'right', 
-              value: currentPrice.toFixed(precision + 1), 
+              value: currentPrice.toFixed(precision), 
               fill: '#3b82f6', 
               fontSize: 10,
               fontWeight: 'bold'
@@ -143,7 +143,7 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
         </div>
         <div className="flex flex-col">
           <span className="text-[10px] text-slate-500 uppercase font-bold">Spread</span>
-          <span className="text-xs font-mono text-slate-300">0.1 Pips</span>
+          <span className="text-xs font-mono text-slate-300">Low</span>
         </div>
         <div className="flex flex-col">
           <span className="text-[10px] text-slate-500 uppercase font-bold">Engine</span>

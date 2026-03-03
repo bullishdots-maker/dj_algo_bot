@@ -3,7 +3,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Play, Square, Activity, Globe, ShieldCheck } from 'lucide-react';
+import { Play, Square, Globe, ShieldCheck } from 'lucide-react';
 import { Asset } from '../types/trading';
 import { 
   Select,
@@ -23,9 +23,8 @@ interface BotStatusProps {
 
 const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActiveAsset }: BotStatusProps) => {
   const formatPrice = (price: number) => {
-    if (activeAsset === 'EUR/USD') return price.toFixed(5);
-    if (activeAsset === 'BTC/USD') return price.toLocaleString(undefined, { minimumFractionDigits: 2 });
-    return price.toFixed(2);
+    if (activeAsset === 'XAG/USD') return price.toFixed(3);
+    return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   return (
@@ -41,13 +40,13 @@ const BotStatus = ({ isActive, setIsActive, currentPrice, activeAsset, setActive
             <div className="space-y-1">
               <Label className="text-[10px] uppercase text-slate-500 font-bold">Live Feed</Label>
               <Select value={activeAsset} onValueChange={(val) => setActiveAsset(val as Asset)}>
-                <SelectTrigger className="w-[160px] bg-slate-900 border-slate-800 text-white h-8">
+                <SelectTrigger className="w-[180px] bg-slate-900 border-slate-800 text-white h-8">
                   <SelectValue placeholder="Select Asset" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-900 border-slate-800 text-white">
-                  <SelectItem value="EUR/USD">EUR/USD (Forex)</SelectItem>
-                  <SelectItem value="XAU/USD">XAU/USD (Gold)</SelectItem>
-                  <SelectItem value="BTC/USD">BTC/USD (Crypto)</SelectItem>
+                  <SelectItem value="BTC/USD">Bitcoin (BTC/USD)</SelectItem>
+                  <SelectItem value="ETH/USD">Ethereum (ETH/USD)</SelectItem>
+                  <SelectItem value="XAG/USD">Silver (XAG/USD)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

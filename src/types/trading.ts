@@ -1,4 +1,4 @@
-export type Asset = 'EUR/USD' | 'XAU/USD' | 'BTC/USD';
+export type Asset = 'XAG/USD' | 'BTC/USD' | 'ETH/USD';
 export type Strategy = 'MEAN_REVERSION' | 'TREND_FOLLOWING';
 
 export interface Candle {

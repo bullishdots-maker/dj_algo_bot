@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTradingSim } from '../hooks/useTradingSim';
 import PriceChart from '../components/PriceChart';
 import OrderFlowTape from '../components/OrderFlowTape';
@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
-  const [activeAsset, setActiveAsset] = useState<Asset>('EUR/USD');
+  const [activeAsset, setActiveAsset] = useState<Asset>('BTC/USD');
   const [lotSize, setLotSize] = useState(1.0);
   const [riskLevel, setRiskLevel] = useState(50);
   

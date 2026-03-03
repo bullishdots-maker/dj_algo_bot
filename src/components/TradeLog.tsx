@@ -28,7 +28,7 @@ const TradeLog = ({ trades }: TradeLogProps) => {
             </div>
           )}
           {trades.map((trade) => {
-            const precision = trade.asset === 'EUR/USD' ? 5 : 2;
+            const precision = trade.asset === 'XAG/USD' ? 3 : 2;
             return (
               <div key={trade.id} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
                 <div className="flex justify-between items-start">
@@ -66,7 +66,7 @@ const TradeLog = ({ trades }: TradeLogProps) => {
                 <div className="flex justify-between items-center pt-1">
                   <div className="flex gap-2">
                     <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px]">
-                      SL: {(trade.price - (trade.type === 'BUY' ? (trade.asset === 'EUR/USD' ? 0.0010 : 2.0) : (trade.asset === 'EUR/USD' ? -0.0010 : -2.0))).toFixed(precision)}
+                      SL: {(trade.price - (trade.type === 'BUY' ? (trade.asset === 'XAG/USD' ? 0.1 : 100) : (trade.asset === 'XAG/USD' ? -0.1 : -100))).toFixed(precision)}
                     </Badge>
                   </div>
                   {trade.status === 'CLOSED' && (

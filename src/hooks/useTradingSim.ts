@@ -3,18 +3,18 @@ import { Candle, Trade, MarketOrder, AccountStats, Asset } from '../types/tradin
 import { format } from 'date-fns';
 
 const SYMBOL_MAP: Record<Asset, string> = {
-  'EUR/USD': 'eurusdt',
-  'XAU/USD': 'paxgusdt',
+  'XAG/USD': 'xagusdt',
   'BTC/USD': 'btcusdt',
+  'ETH/USD': 'ethusdt',
 };
 
-const ASSET_CONFIG: Record<Asset, { lotSize: number; precision: number }> = {
-  'EUR/USD': { lotSize: 100000, precision: 5 },
-  'XAU/USD': { lotSize: 100, precision: 2 },
-  'BTC/USD': { lotSize: 1, precision: 2 },
+const ASSET_CONFIG: Record<Asset, { lotSize: number; precision: number; pipValue: number }> = {
+  'XAG/USD': { lotSize: 5000, precision: 3, pipValue: 0.01 },
+  'BTC/USD': { lotSize: 1, precision: 2, pipValue: 1 },
+  'ETH/USD': { lotSize: 10, precision: 2, pipValue: 1 },
 };
 
-const STORAGE_KEY = 'trading_sim_data_v4';
+const STORAGE_KEY = 'trading_sim_data_v5';
 
 const calculateRSI = (candles: Candle[], period: number = 14) => {
   if (candles.length <= period) return 50;
@@ -25,6 +25,7 @@ const calculateRSI = (candles: Candle[], period: number = 14) => {
     if (diff >= 0) gains += diff;
     else losses -= diff;
   }
+  if (losses === 0) return 100;
   const rs = gains / losses;
   return 100 - (100 / (1 + rs));
 };
@@ -86,7 +87,10 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
           
           setAccount(acc => {
             const newBalance = acc.balance + finalPnl;
-            const closedTrades = [...prev.filter(tr => tr.status === 'CLOSED' || tr.id === tradeId), { ...t, status: 'CLOSED', pnl: finalPnl }];
+            const closedTrades: Trade[] = [
+              ...prev.filter(tr => tr.status === 'CLOSED' || tr.id === tradeId), 
+              { ...t, status: 'CLOSED' as const, pnl: finalPnl }
+            ];
             const wins = closedTrades.filter(tr => (tr.pnl || 0) > 0).length;
             return {
               ...acc,
@@ -95,7 +99,7 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
               winRate: (wins / closedTrades.length) * 100
             };
           });
-          return { ...t, status: 'CLOSED', pnl: finalPnl, exitPrice };
+          return { ...t, status: 'CLOSED' as const, pnl: finalPnl, exitPrice };
         }
         return t;
       });
@@ -163,28 +167,24 @@ export const useTradingSim = (isActive: boolean, activeAsset: Asset) => {
   const processAlphaProLogic = useCallback((asset: Asset, candle: Candle) => {
     const openTrades = tradesRef.current.filter(t => t.status === 'OPEN' && t.asset === asset && !t.isManual);
     
-    // Exit Logic: Close if profit target reached or trend reverses
     if (openTrades.length > 0) {
       const trade = openTrades[0];
       const pnl = trade.type === 'BUY' ? (candle.close - trade.price) : (trade.price - candle.close);
-      const pips = pnl * (asset === 'EUR/USD' ? 10000 : 1);
+      const pips = pnl / ASSET_CONFIG[asset].pipValue;
       
-      if (pips > 10 || pips < -5) { // 2:1 Reward/Risk Ratio
+      if (pips > 20 || pips < -10) { 
         closeTrade(trade.id, candle.close);
       }
       return;
     }
 
-    // Entry Logic: Alpha-Pro Hybrid Strategy
-    // High Win Rate: RSI Reversal + MA Trend Confirmation + Momentum Delta
     const rsi = candle.rsi || 50;
     const ma7 = candle.ma7 || candle.close;
     const isBullishTrend = candle.close > ma7;
-    const isStrongMomentum = Math.abs(candle.delta) > 500;
 
-    if (rsi < 35 && isBullishTrend && candle.delta > 0) {
+    if (rsi < 30 && isBullishTrend && candle.delta > 0) {
       executeManualTrade('BUY', candle.close, 'Alpha-Pro: Bullish Reversal');
-    } else if (rsi > 65 && !isBullishTrend && candle.delta < 0) {
+    } else if (rsi > 70 && !isBullishTrend && candle.delta < 0) {
       executeManualTrade('SELL', candle.close, 'Alpha-Pro: Bearish Reversal');
     }
   }, [closeTrade, executeManualTrade]);
