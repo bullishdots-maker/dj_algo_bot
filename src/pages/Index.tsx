@@ -32,6 +32,8 @@ import StrategyCustomizer from '../components/StrategyCustomizer';
 import TradingJournal from '../components/TradingJournal';
 import AlertsPanel from '../components/AlertsPanel';
 import Header from '../components/Header';
+import NeuralTrainingMonitor from '../components/NeuralTrainingMonitor';
+import GlobalMacroView from '../components/GlobalMacroView';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
 import { toast } from "sonner";
@@ -49,8 +51,6 @@ const Index = () => {
     candles, trades, orders, currentPrice, account, sentiment, equityHistory,
     news, geoEvents, ecoEvents, quantChat, neuralWeights, executeManualTrade, closeTrade 
   } = useTradingSim(isActive, activeAsset);
-
-  const openTrades = trades.filter(t => t.status === 'OPEN');
 
   const handleExportCSV = () => {
     const headers = ['ID', 'Asset', 'Time', 'Type', 'Price', 'Status', 'PnL', 'Reason'];
@@ -145,7 +145,7 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <NeuralMatrix weights={neuralWeights} />
-              <MarketSentiment sentiment={sentiment} />
+              <NeuralTrainingMonitor />
               <SystemHealth />
             </div>
 
@@ -194,6 +194,8 @@ const Index = () => {
               onSelect={setActiveAsset} 
               currentPrice={currentPrice} 
             />
+            <GlobalMacroView />
+            <MarketSentiment sentiment={sentiment} />
             <AlertsPanel />
             <div className="h-[400px] shadow-2xl">
               <WhaleTracker />
