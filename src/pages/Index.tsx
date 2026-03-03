@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTradingSim } from '../hooks/useTradingSim';
 import PriceChart from '../components/PriceChart';
 import OrderFlowTape from '../components/OrderFlowTape';
@@ -7,11 +7,23 @@ import TradeLog from '../components/TradeLog';
 import AccountOverview from '../components/AccountOverview';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
+import { toast } from "sonner";
 
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
   const [activeAsset, setActiveAsset] = useState<Asset>('EUR/USD');
   const { candles, trades, orders, currentPrice, account } = useTradingSim(isActive, activeAsset);
+
+  // Notify on new trade execution
+  useEffect(() => {
+    if (trades.length > 0 && trades[0].status === 'OPEN') {
+      const latestTrade = trades[0];
+      toast.info(`New ${latestTrade.type} Order`, {
+        description: `${latestTrade.asset} executed at ${latestTrade.price.toFixed(activeAsset === 'EUR/USD' ? 5 : 2)}`,
+        duration: 3000,
+      });
+    }
+  }, [trades.length]);
 
   return (
     <div className="min-h-screen bg-black text-slate-200 p-4 md:p-8 font-sans selection:bg-blue-500/30">
@@ -32,13 +44,13 @@ const Index = () => {
           </div>
           <div className="hidden lg:block">
             <div className="h-full p-6 rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/20 flex flex-col justify-center">
-              <h4 className="text-blue-400 font-bold uppercase tracking-widest text-xs mb-2">System Health</h4>
+              <h4 className="text-blue-400 font-bold uppercase tracking-widest text-[10px] mb-2">System Health</h4>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-sm font-medium">Engine Online</span>
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between text-[10px] uppercase font-bold">
                   <span className="text-slate-400">Latency</span>
                   <span className="text-slate-200">14ms</span>
                 </div>
@@ -54,14 +66,19 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Chart & Log */}
           <div className="lg:col-span-8 space-y-6">
-            <PriceChart data={candles} activeAsset={activeAsset} />
+            <PriceChart 
+              data={candles} 
+              activeAsset={activeAsset} 
+              trades={trades}
+              currentPrice={currentPrice}
+            />
             <div className="h-[400px]">
               <TradeLog trades={trades} />
             </div>
           </div>
 
           {/* Right: Order Flow Tape */}
-          <div className="lg:col-span-4 h-[824px]">
+          <div className="lg:col-span-4 h-[874px]">
             <OrderFlowTape orders={orders} activeAsset={activeAsset} />
           </div>
         </div>

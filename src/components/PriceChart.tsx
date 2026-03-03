@@ -1,53 +1,150 @@
 import React from 'react';
-import { ResponsiveContainer, ComposedChart, XAxis, YAxis, Tooltip, Bar, Line, Cell } from 'recharts';
-import { Candle, Asset } from '../types/trading';
+import { 
+  ResponsiveContainer, 
+  ComposedChart, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Bar, 
+  Line, 
+  Cell, 
+  ReferenceLine,
+  Scatter
+} from 'recharts';
+import { Candle, Asset, Trade } from '../types/trading';
 import { Card } from './ui/card';
 
 interface PriceChartProps {
   data: Candle[];
   activeAsset: Asset;
+  trades: Trade[];
+  currentPrice: number;
 }
 
-const PriceChart = ({ data, activeAsset }: PriceChartProps) => {
+const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps) => {
   const precision = activeAsset === 'EUR/USD' ? 4 : 2;
 
+  // Prepare trade markers for the chart
+  const tradeMarkers = trades
+    .filter(t => t.asset === activeAsset)
+    .map(t => ({
+      time: t.time,
+      price: t.price,
+      type: t.type,
+      status: t.status
+    }));
+
   return (
-    <Card className="p-4 bg-slate-950 border-slate-800 h-[400px]">
+    <Card className="p-4 bg-slate-950 border-slate-800 h-[450px] relative overflow-hidden">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-slate-200 font-semibold">{activeAsset} Price Action</h3>
-        <div className="flex gap-4 text-xs">
-          <span className="text-emerald-500">● Bullish Delta</span>
-          <span className="text-rose-500">● Bearish Delta</span>
+        <div className="flex items-center gap-3">
+          <h3 className="text-slate-200 font-semibold">{activeAsset} Live Execution</h3>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Live</span>
+          </div>
+        </div>
+        <div className="flex gap-4 text-[10px] uppercase font-bold tracking-tight">
+          <span className="text-emerald-500 flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-emerald-500" /> Buy Signal
+          </span>
+          <span className="text-rose-500 flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-rose-500" /> Sell Signal
+          </span>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height="100%">
+
+      <ResponsiveContainer width="100%" height="90%">
         <ComposedChart data={data}>
-          <XAxis dataKey="time" stroke="#475569" fontSize={12} />
+          <defs>
+            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <XAxis 
+            dataKey="time" 
+            stroke="#334155" 
+            fontSize={10} 
+            tickLine={false}
+            axisLine={false}
+          />
           <YAxis 
             domain={['auto', 'auto']} 
-            stroke="#475569" 
-            fontSize={12} 
+            stroke="#334155" 
+            fontSize={10} 
+            orientation="right"
             tickFormatter={(val) => val.toFixed(precision)}
+            tickLine={false}
+            axisLine={false}
           />
           <Tooltip 
-            contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}
-            itemStyle={{ color: '#f1f5f9' }}
+            contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '8px' }}
+            itemStyle={{ color: '#f1f5f9', fontSize: '12px' }}
+            labelStyle={{ color: '#94a3b8', fontSize: '10px', marginBottom: '4px' }}
             formatter={(value: number) => [value.toFixed(precision + 1), 'Price']}
           />
-          <Bar dataKey="delta" yAxisId={0} opacity={0.3}>
+          
+          {/* Volume/Delta Bars */}
+          <Bar dataKey="delta" yAxisId={0} opacity={0.15}>
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.delta > 0 ? '#10b981' : '#f43f5e'} />
             ))}
           </Bar>
+
+          {/* Price Line */}
           <Line 
             type="monotone" 
             dataKey="close" 
             stroke="#3b82f6" 
             dot={false} 
             strokeWidth={2}
+            animationDuration={300}
           />
+
+          {/* Current Price Reference */}
+          <ReferenceLine 
+            y={currentPrice} 
+            stroke="#3b82f6" 
+            strokeDasharray="3 3" 
+            label={{ 
+              position: 'right', 
+              value: currentPrice.toFixed(precision + 1), 
+              fill: '#3b82f6', 
+              fontSize: 10,
+              fontWeight: 'bold',
+              backgroundColor: '#020617'
+            }} 
+          />
+
+          {/* Trade Execution Markers */}
+          <Scatter 
+            data={tradeMarkers} 
+            fill="#8884d8"
+          >
+            {tradeMarkers.map((entry, index) => (
+              <Cell 
+                key={`trade-${index}`} 
+                fill={entry.type === 'BUY' ? '#10b981' : '#f43f5e'} 
+                stroke="#fff"
+                strokeWidth={2}
+                r={6}
+              />
+            ))}
+          </Scatter>
         </ComposedChart>
       </ResponsiveContainer>
+      
+      <div className="absolute bottom-6 left-8 flex gap-4">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-500 uppercase font-bold">Volatility</span>
+          <span className="text-xs font-mono text-slate-300">High</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-500 uppercase font-bold">Spread</span>
+          <span className="text-xs font-mono text-slate-300">0.2 Pips</span>
+        </div>
+      </div>
     </Card>
   );
 };
