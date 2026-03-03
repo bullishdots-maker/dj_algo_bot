@@ -24,7 +24,6 @@ interface PriceChartProps {
 const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps) => {
   const precision = activeAsset === 'EUR/USD' ? 4 : 2;
 
-  // Prepare trade markers for the chart
   const tradeMarkers = trades
     .filter(t => t.asset === activeAsset)
     .map(t => ({
@@ -51,17 +50,14 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
           <span className="text-rose-500 flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-rose-500" /> Sell Signal
           </span>
+          <span className="text-amber-500 flex items-center gap-1">
+            <div className="w-2 h-0.5 bg-amber-500" /> MA(7)
+          </span>
         </div>
       </div>
 
       <ResponsiveContainer width="100%" height="90%">
         <ComposedChart data={data}>
-          <defs>
-            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-            </linearGradient>
-          </defs>
           <XAxis 
             dataKey="time" 
             stroke="#334155" 
@@ -85,14 +81,12 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
             formatter={(value: number) => [value.toFixed(precision + 1), 'Price']}
           />
           
-          {/* Volume/Delta Bars */}
           <Bar dataKey="delta" yAxisId={0} opacity={0.15}>
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.delta > 0 ? '#10b981' : '#f43f5e'} />
             ))}
           </Bar>
 
-          {/* Price Line */}
           <Line 
             type="monotone" 
             dataKey="close" 
@@ -102,7 +96,18 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
             animationDuration={300}
           />
 
-          {/* Current Price Reference */}
+          {/* Moving Average Line */}
+          <Line 
+            type="monotone" 
+            dataKey="ma7" 
+            stroke="#f59e0b" 
+            dot={false} 
+            strokeWidth={1.5}
+            strokeDasharray="5 5"
+            opacity={0.6}
+            animationDuration={300}
+          />
+
           <ReferenceLine 
             y={currentPrice} 
             stroke="#3b82f6" 
@@ -112,12 +117,10 @@ const PriceChart = ({ data, activeAsset, trades, currentPrice }: PriceChartProps
               value: currentPrice.toFixed(precision + 1), 
               fill: '#3b82f6', 
               fontSize: 10,
-              fontWeight: 'bold',
-              backgroundColor: '#020617'
+              fontWeight: 'bold'
             }} 
           />
 
-          {/* Trade Execution Markers */}
           <Scatter 
             data={tradeMarkers} 
             fill="#8884d8"

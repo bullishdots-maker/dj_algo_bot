@@ -7,6 +7,8 @@ import TradeLog from '../components/TradeLog';
 import AccountOverview from '../components/AccountOverview';
 import RiskSettings from '../components/RiskSettings';
 import PerformanceAnalytics from '../components/PerformanceAnalytics';
+import MarketSentiment from '../components/MarketSentiment';
+import EconomicCalendar from '../components/EconomicCalendar';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Asset } from '../types/trading';
 import { toast } from "sonner";
@@ -17,9 +19,8 @@ const Index = () => {
   const [lotSize, setLotSize] = useState(1.0);
   const [riskLevel, setRiskLevel] = useState(50);
   
-  const { candles, trades, orders, currentPrice, account } = useTradingSim(isActive, activeAsset);
+  const { candles, trades, orders, currentPrice, account, sentiment } = useTradingSim(isActive, activeAsset);
 
-  // Notify on new trade execution
   useEffect(() => {
     if (trades.length > 0 && trades[0].status === 'OPEN') {
       const latestTrade = trades[0];
@@ -33,10 +34,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-black text-slate-200 p-4 md:p-8 font-sans selection:bg-blue-500/30">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Account Stats Row */}
         <AccountOverview account={account} />
 
-        {/* Header & Controls */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
             <BotStatus 
@@ -67,9 +66,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Chart & Log */}
           <div className="lg:col-span-8 space-y-6">
             <PriceChart 
               data={candles} 
@@ -77,6 +74,10 @@ const Index = () => {
               trades={trades}
               currentPrice={currentPrice}
             />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <MarketSentiment sentiment={sentiment} />
+              <EconomicCalendar />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <RiskSettings 
                 lotSize={lotSize} 
@@ -91,7 +92,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Right Column: Order Flow Tape */}
           <div className="lg:col-span-4 h-full">
             <div className="sticky top-6 h-[calc(100vh-100px)]">
               <OrderFlowTape orders={orders} activeAsset={activeAsset} />
